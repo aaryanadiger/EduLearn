@@ -1,0 +1,117 @@
+
+> edulearnr@0.1.0 build
+> next build
+
+ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Aarya\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Aarya\Downloads\foe final\edulearnr\package-lock.json
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 4 errors:
+./Downloads/foe final/edulearnr/src/app/career/page.tsx:7:1
+Export Bullhorn doesn't exist in target module
+   5 | import CustomCursor from "@/components/CustomCursor";
+   6 | import SmoothScroll from "@/components/SmoothScroll";
+>  7 | import { Search, FileText, MessageSquare, Code, LineChart, PenTool, Bullhorn, TrendingUp, ArrowUpRight } from "lucide-react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export default function CareerPage() {
+  10 |     return (
+
+The export Bullhorn was not found in module [project]/Downloads/foe final/edulearnr/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+Did you mean to import Balloon?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Server Component]
+
+
+./Downloads/foe final/edulearnr/src/app/career/page.tsx:7:1
+Export Bullhorn doesn't exist in target module
+   5 | import CustomCursor from "@/components/CustomCursor";
+   6 | import SmoothScroll from "@/components/SmoothScroll";
+>  7 | import { Search, FileText, MessageSquare, Code, LineChart, PenTool, Bullhorn, TrendingUp, ArrowUpRight } from "lucide-react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export default function CareerPage() {
+  10 |     return (
+
+The export Bullhorn was not found in module [project]/Downloads/foe final/edulearnr/node_modules/lucide-react/dist/esm/lucide-react.js [app-ssr] (ecmascript).
+Did you mean to import Balloon?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/career/page.tsx [Server Component]
+
+
+./Downloads/foe final/edulearnr/src/app/resources/page.tsx:7:1
+Export Bullhorn doesn't exist in target module
+   5 | import CustomCursor from "@/components/CustomCursor";
+   6 | import SmoothScroll from "@/components/SmoothScroll";
+>  7 | import { Code, Palette, Database, Briefcase, Bullhorn, Smartphone, Download, Star } from "lucide-react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export default function ResourcesPage() {
+  10 |     return (
+
+The export Bullhorn was not found in module [project]/Downloads/foe final/edulearnr/node_modules/lucide-react/dist/esm/lucide-react.js [app-client] (ecmascript).
+Did you mean to import Balloon?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Server Component]
+
+
+./Downloads/foe final/edulearnr/src/app/resources/page.tsx:7:1
+Export Bullhorn doesn't exist in target module
+   5 | import CustomCursor from "@/components/CustomCursor";
+   6 | import SmoothScroll from "@/components/SmoothScroll";
+>  7 | import { Code, Palette, Database, Briefcase, Bullhorn, Smartphone, Download, Star } from "lucide-react";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export default function ResourcesPage() {
+  10 |     return (
+
+The export Bullhorn was not found in module [project]/Downloads/foe final/edulearnr/node_modules/lucide-react/dist/esm/lucide-react.js [app-ssr] (ecmascript).
+Did you mean to import Balloon?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/resources/page.tsx [Server Component]
+
+
+    at <unknown> (./Downloads/foe final/edulearnr/src/app/career/page.tsx:7:1)
+    at <unknown> (./Downloads/foe final/edulearnr/src/app/career/page.tsx:7:1)
+    at <unknown> (./Downloads/foe final/edulearnr/src/app/resources/page.tsx:7:1)
+    at <unknown> (./Downloads/foe final/edulearnr/src/app/resources/page.tsx:7:1)

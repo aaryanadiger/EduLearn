@@ -1,0 +1,41 @@
+ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Aarya\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Aarya\Downloads\foe final\edulearnr\package-lock.json
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./Downloads/foe final/edulearnr/src/components/CallToAction.tsx:16:23
+Module not found: Can't resolve 'animejs/lib/anime.js'
+  14 |
+  15 |         // Dynamically import anime to bypass Next SSR issues
+> 16 |         const anime = require("animejs/lib/anime.js");
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  17 |
+  18 |         // Set up Anime.js animation that we will manually scrub on scroll
+  19 |         const animation = anime({
+
+
+
+Import traces:
+  Client Component Browser:
+    ./Downloads/foe final/edulearnr/src/components/CallToAction.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/page.tsx [Client Component Browser]
+    ./Downloads/foe final/edulearnr/src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./Downloads/foe final/edulearnr/src/components/CallToAction.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/page.tsx [Client Component SSR]
+    ./Downloads/foe final/edulearnr/src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./Downloads/foe final/edulearnr/src/components/CallToAction.tsx:16:23)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
