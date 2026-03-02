@@ -1,0 +1,7 @@
+Fetching projects in aaryanadigers-projects
+> Projects found under aaryanadigers-projects  [1s]
+
+  Project Name     Latest Production URL                                      Updated   Node Version   
+  edulearn-azure   https://edulearn-azure-aaryanadigers-projects.vercel.app   2m        24.x           
+  edulearnr        --                                                         4m        24.x           
+

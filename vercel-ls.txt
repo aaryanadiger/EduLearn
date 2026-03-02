@@ -1,0 +1,19 @@
+Fetching deployments in aaryanadigers-projects
+> Deployments for aaryanadigers-projects/edulearn [301ms]
+
+  Age     Project                             Deployment                                                       Status      Environment     Duration     Username         
+  3h      aaryanadigers-projects/edulearn     https://edulearn-f05g203lk-aaryanadigers-projects.vercel.app     ΓùÅ Error     Production      34s          aaryanadiger     
+  13h     aaryanadigers-projects/edulearn     https://edulearn-mp07x8ddw-aaryanadigers-projects.vercel.app     ΓùÅ Error     Production      34s          aaryanadiger     
+  14h     aaryanadigers-projects/edulearn     https://edulearn-o840dj9k0-aaryanadigers-projects.vercel.app     ΓùÅ Error     Production      34s          aaryanadiger     
+  14h     aaryanadigers-projects/edulearn     https://edulearn-9rat393k1-aaryanadigers-projects.vercel.app     ΓùÅ Error     Production      33s          aaryanadiger     
+  4d      aaryanadigers-projects/edulearn     https://edulearn-q6dyeaf03-aaryanadigers-projects.vercel.app     ΓùÅ Ready     Production      50s          aaryanadiger     
+  4d      aaryanadigers-projects/edulearn     https://edulearn-df7v6i2cc-aaryanadigers-projects.vercel.app     ΓùÅ Ready     Preview         47s          aaryanadiger     
+  4d      aaryanadigers-projects/edulearn     https://edulearn-3dghw8q2d-aaryanadigers-projects.vercel.app     ΓùÅ Ready     Production      6s           aaryanadiger     
+
+https://edulearn-f05g203lk-aaryanadigers-projects.vercel.app
+https://edulearn-mp07x8ddw-aaryanadigers-projects.vercel.app
+https://edulearn-o840dj9k0-aaryanadigers-projects.vercel.app
+https://edulearn-9rat393k1-aaryanadigers-projects.vercel.app
+https://edulearn-q6dyeaf03-aaryanadigers-projects.vercel.app
+https://edulearn-df7v6i2cc-aaryanadigers-projects.vercel.app
+https://edulearn-3dghw8q2d-aaryanadigers-projects.vercel.app

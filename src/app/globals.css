@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #000000;
+  --color-secondary: #FFFFFF;
+  --color-accent: #FF5E00;
+  --color-accent-light: #FFA500;
+
+  --font-sans: var(--font-outfit);
+}
+
+:root {
+  /* Default to Dark Mode colors */
+  --background: #030303;
+  /* Deep black/gray */
+  --foreground: #ffffff;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), sans-serif;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
+  cursor: url("/cursors/normal.cur"), auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium heading adjustments */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.02em;
+}
+
+a,
+button,
+[role="button"],
+select,
+.cursor-pointer,
+.lucide {
+  cursor: url("/cursors/pointer.cur"), pointer !important;
+}
+
+input,
+textarea,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span {
+  cursor: url("/cursors/text.cur"), text;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+}
+
+/* Marquee Utilities for Infinite Scroll */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 120s linear infinite;
+}
+
+.animate-scroll-right {
+  animation: scroll-right 120s linear infinite;
+}
+
+/* Hide Spline Watermark */
+#spline-watermark,
+#logo,
+a[href*="spline.design"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

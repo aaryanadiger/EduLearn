@@ -1,0 +1,37 @@
+
+> edulearnr@1.1.0 build
+> next build
+
+ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Aarya\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Aarya\Downloads\foe final\edulearnr\package-lock.json
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 2.9s
+  Running TypeScript ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/27) ...
+Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at bJ (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:326765)
+    at bK (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:326814)
+    at af.instanceFactory (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:379953)
+    at ah.getOrInitializeService (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:307073)
+    at ah.initialize (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:306481)
+    at cT (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:364217)
+    at dN (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:3:380591)
+    at module evaluation (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[root-of-the-server]__dd0bcf9c._.js:14:67153)
+    at instantiateModule (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\Aarya\Downloads\foe final\edulearnr\.next\server\chunks\ssr\[turbopack]_runtime.js:763:12) {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '899107721'
+}
+Export encountered an error on /_not-found/page: /_not-found, exiting the build.
+Γ¿» Next.js build worker exited with code: 1 and signal: null

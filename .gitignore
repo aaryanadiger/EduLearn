@@ -1,0 +1,67 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env*
+.env*.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Editor
+.vscode/
+.idea/
+
+# Build logs & dev artifacts
+build_log.txt
+build_output.txt
+lint-errors.txt
+
+# Uploaded assets (keep out of repo)
+public/assets/
+public/cursors/
+public/edubot-logo.jpeg
+# public/edubot-logo.png is tracked (EduBot icon)
+public/lighthouse-report.html
+AGENTS.md
+
+# Default Next.js boilerplate SVGs
+public/file.svg
+public/globe.svg
+public/next.svg
+public/vercel.svg
+public/window.svg
+
+.vercel
+.env*.local

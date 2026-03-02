@@ -1,0 +1,130 @@
+> [debug] [2026-03-02T18:41:27.411Z] Vercel CLI 50.25.5
+> [debug] [2026-03-02T18:41:27.414Z] Agent/TTY/nonInteractive: isAgent=false agentName=none stdin.isTTY=true --non-interactive=false explicitFalse=false => nonInteractive=false
+> [debug] [2026-03-02T18:41:27.414Z] user supplied known subcommand: "build"
+WARN! Build not running on Vercel. System environment variables will not be available.
+> [debug] [2026-03-02T18:41:27.471Z] Loaded environment variables from "C:\Users\Aarya\Downloads\foe final\edulearnr\.vercel\.env.preview.local"
+> [debug] [2026-03-02T18:41:27.485Z] Locating files C:\Users\Aarya\Downloads\foe final\edulearnr
+> [debug] [2026-03-02T18:41:27.486Z] Ignoring C:\Users\Aarya\Downloads\foe final\edulearnr\.env.local
+> [debug] [2026-03-02T18:41:27.486Z] Ignoring C:\Users\Aarya\Downloads\foe final\edulearnr\.git
+> [debug] [2026-03-02T18:41:27.486Z] Ignoring C:\Users\Aarya\Downloads\foe final\edulearnr\.gitignore
+> [debug] [2026-03-02T18:41:27.486Z] Ignoring C:\Users\Aarya\Downloads\foe final\edulearnr\.vercel
+> [debug] [2026-03-02T18:41:27.486Z] Ignoring C:\Users\Aarya\Downloads\foe final\edulearnr\node_modules
+> [debug] [2026-03-02T18:41:27.488Z] Locating files C:\Users\Aarya\Downloads\foe final\edulearnr [3ms]
+> [debug] [2026-03-02T18:41:27.558Z] Imported Builder "@vercel/next" from "C:\Users\Aarya\AppData\Local\npm-cache\_npx\69f9afb961c37556\node_modules\@vercel\next"
+> [debug] [2026-03-02T18:41:27.558Z] Resolved builders: "@vercel/next => 4.15.36"
+> [debug] [2026-03-02T18:41:27.566Z] Setting env VERCEL_PROJECT_SETTINGS_NODE_VERSION to "24.x"
+> [debug] [2026-03-02T18:41:27.566Z] Building entrypoint "package.json" with "@vercel/next"
+Installing dependencies...
+
+up to date in 543ms
+
+147 packages are looking for funding
+  run `npm fund` for details
+Detected Next.js version: 16.1.6
+Running "npm run build"
+
+> edulearnr@1.1.0 build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 3.2s
+  Running TypeScript ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/27) ...
+  Generating static pages using 31 workers (6/27) 
+  Generating static pages using 31 workers (13/27) 
+  Generating static pages using 31 workers (20/27) 
+Γ£ô Generating static pages using 31 workers (27/27) in 585.2ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /about
+Γö£ Γùï /admin-panel
+Γö£ Γùï /benefits
+Γö£ Γùï /career
+Γö£ Γùï /cart
+Γö£ Γùï /contact
+Γö£ Γùï /courses
+Γö£ ╞Æ /courses/[id]
+Γö£ Γùï /dashboard/admin
+Γö£ Γùï /dashboard/student
+Γö£ Γùï /dashboard/teacher
+Γö£ Γùï /faculty-panel
+Γö£ Γùï /faq
+Γö£ Γùï /features
+Γö£ Γùï /icon.svg
+Γö£ Γùï /live-classes
+Γö£ Γùï /login
+Γö£ Γùï /mental-health
+Γö£ Γùï /mentors
+Γö£ Γùï /pricing
+Γö£ Γùï /reset-password
+Γö£ Γùï /resources
+Γö£ Γùï /signup
+Γö£ Γùï /student-panel
+Γöö Γùï /testimonials
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
+Tracing initial Next.js server files due to missing build trace: 8.123s
+Traced Next.js server files in: 8.917s
+Tracing entries due to missing build traces:
+[
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/_global-error/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/_not-found/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/about/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/admin-panel/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/benefits/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/career/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/cart/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/contact/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/courses/[id]/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/courses/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/dashboard/admin/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/dashboard/student/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/dashboard/teacher/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/faculty-panel/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/faq/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/features/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/live-classes/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/login/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/mental-health/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/mentors/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/pricing/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/reset-password/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/resources/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/signup/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/student-panel/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/testimonials/page.js",
+  "C:/Users/Aarya/Downloads/foe final/edulearnr/.next/server/app/icon.svg/route.js"
+]: 38.121ms
+Created all serverless functions in: 125.782ms
+Error: Unable to find lambda for route: /dashboard/admin
+> [debug] [2026-03-02T18:41:47.982Z] Telemetry event tracked
+> [debug] [2026-03-02T18:41:48.058Z] Telemetry subprocess exited with code 0
+> [debug] [2026-03-02T18:41:48.059Z] Spawning C:\Users\Aarya\AppData\Local\npm-cache\_npx\69f9afb961c37556\node_modules\vercel\dist\get-latest-worker.cjs
+> '[debug] [2026-03-02T18:41:48.107Z] Notifying parent we're ready
+> '[debug] [2026-03-02T18:41:48.109Z] Received message from parent: {
+  cacheFile: 'C:\\Users\\Aarya\\AppData\\Local\\com.vercel.cli\\Cache\\package-updates\\vercel-latest.json',
+  distTag: 'latest',
+  name: 'vercel',
+  updateCheckInterval: 86400000
+}
+> '[debug] [2026-03-02T18:41:48.109Z] Disconnecting from parent
+> '[debug] [2026-03-02T18:41:48.111Z] Checking lock file: C:\Users\Aarya\AppData\Local\com.vercel.cli\Cache\package-updates\vercel-latest.lock
+> '[debug] [2026-03-02T18:41:48.112Z] Found lock file with pid: 8444
+> '[debug] [2026-03-02T18:41:48.112Z] Resetting lock file: Error: kill ESRCH
+> '[debug] [2026-03-02T18:41:48.113Z] Initializing lock file with pid 26120
+> '[debug] [2026-03-02T18:41:48.114Z] Fetching https://registry.npmjs.org/-/package/vercel/dist-tags
