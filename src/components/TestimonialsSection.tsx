@@ -1,11 +1,34 @@
 "use client";
 
-import { useRef } from "react";
-import { testimonials } from "@/data/testimonials";
+import { useRef, useState, useEffect } from "react";
+import { testimonials as staticTestimonials, Testimonial } from "@/data/testimonials";
+import { courses } from "@/data/courses";
 import { Star, Quote } from "lucide-react";
+import { getTopReviews } from "@/lib/db";
 
 export default function TestimonialsSection() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [allTestimonials, setAllTestimonials] = useState<Testimonial[]>(staticTestimonials);
+
+    useEffect(() => {
+        getTopReviews(10).then(reviews => {
+            const mappedReviews: Testimonial[] = reviews.map(r => {
+                const course = courses.find(c => c.id === r.courseId);
+                return {
+                    id: r.id || Math.random().toString(),
+                    name: r.userName,
+                    role: "Student",
+                    course: course ? course.name : "EduLearn Course",
+                    text: r.text,
+                    stars: r.rating
+                };
+            });
+            // Only prepend if we found any dynamic top reviews
+            if (mappedReviews.length > 0) {
+                setAllTestimonials([...mappedReviews, ...staticTestimonials]);
+            }
+        });
+    }, []);
 
     return (
         <section
@@ -32,7 +55,7 @@ export default function TestimonialsSection() {
                     ref={scrollContainerRef}
                     className="flex gap-8 w-max pb-10 animate-scroll-right hover:[animation-play-state:paused] will-change-transform"
                 >
-                    {[...testimonials, ...testimonials].map((testimonial, i) => (
+                    {[...allTestimonials, ...allTestimonials].map((testimonial, i) => (
                         <div
                             key={`${testimonial.id}-${i}`}
                             className={`w-[350px] md:w-[450px] h-[450px] shrink-0 p-10 rounded-[32px] flex flex-col justify-between transition-transform duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-accent/20 border border-neutral-800 ${i % 2 !== 0 ? 'bg-neutral-900' : 'bg-neutral-950'}`}

@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, increment } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc, increment, orderBy, limit } from "firebase/firestore";
 
 // User Profile Functions
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,5 +168,64 @@ export const createCourse = async (courseData: any) => {
     } catch (error) {
         console.error("Error creating course:", error);
         return false;
+    }
+};
+
+// Review Functions
+export interface Review {
+    id?: string;
+    courseId: string;
+    userId: string;
+    userName: string;
+    rating: number; // 1-5
+    text: string;
+    createdAt?: any;
+}
+
+export const addReview = async (reviewData: Omit<Review, 'id' | 'createdAt'>) => {
+    try {
+        const reviewsRef = collection(db, "reviews");
+        await addDoc(reviewsRef, {
+            ...reviewData,
+            createdAt: serverTimestamp(),
+        });
+        return true;
+    } catch (error) {
+        console.error("Error adding review:", error);
+        return false;
+    }
+};
+
+export const getCourseReviews = async (courseId: string) => {
+    try {
+        const reviewsRef = collection(db, "reviews");
+        const q = query(reviewsRef, where("courseId", "==", courseId), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        const reviews: Review[] = [];
+        querySnapshot.forEach((doc) => {
+            reviews.push({ id: doc.id, ...doc.data() } as Review);
+        });
+        return reviews;
+    } catch (error) {
+        console.error("Error fetching course reviews:", error);
+        return [];
+    }
+};
+
+export const getTopReviews = async (limitCount = 5) => {
+    try {
+        const reviewsRef = collection(db, "reviews");
+        const q = query(reviewsRef, orderBy("rating", "desc"), orderBy("createdAt", "desc"), limit(limitCount));
+        const querySnapshot = await getDocs(q);
+
+        const reviews: Review[] = [];
+        querySnapshot.forEach((doc) => {
+            reviews.push({ id: doc.id, ...doc.data() } as Review);
+        });
+        return reviews;
+    } catch (error) {
+        console.error("Error fetching top reviews:", error);
+        return [];
     }
 };
