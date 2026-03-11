@@ -1,34 +1,12 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { testimonials as staticTestimonials, Testimonial } from "@/data/testimonials";
-import { courses } from "@/data/courses";
+import { useRef } from "react";
+import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote } from "lucide-react";
-import { getTopReviews } from "@/lib/db";
 
 export default function TestimonialsSection() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [allTestimonials, setAllTestimonials] = useState<Testimonial[]>(staticTestimonials);
-
-    useEffect(() => {
-        getTopReviews(10).then(reviews => {
-            const mappedReviews: Testimonial[] = reviews.map(r => {
-                const course = courses.find(c => c.id === r.courseId);
-                return {
-                    id: r.id || Math.random().toString(),
-                    name: r.userName,
-                    role: "Student",
-                    course: course ? course.name : "EduLearn Course",
-                    text: r.text,
-                    stars: r.rating
-                };
-            });
-            // Only prepend if we found any dynamic top reviews
-            if (mappedReviews.length > 0) {
-                setAllTestimonials([...mappedReviews, ...staticTestimonials]);
-            }
-        });
-    }, []);
+    const allTestimonials = staticTestimonials;
 
     return (
         <section

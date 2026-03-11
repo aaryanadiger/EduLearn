@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { courses } from "@/data/courses";
-import { getCourseReviews, addReview, Review } from "@/lib/db";
+import { getCourseReviews, addReview, updateReview, deleteReview, Review } from "@/lib/db";
 import { useAuth } from "@/context/AuthContext";
 import { TopNav, BottomNav } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star } from "lucide-react";
+import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, Trash2, X } from "lucide-react";
 
 export default function CourseDetail() {
     const params = useParams();
@@ -23,6 +23,15 @@ export default function CourseDetail() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hoveredRating, setHoveredRating] = useState(0);
 
+    // Edit State
+    const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+    const [editReviewText, setEditReviewText] = useState("");
+    const [editReviewRating, setEditReviewRating] = useState(5);
+    const [editHoveredRating, setEditHoveredRating] = useState(0);
+
+    // Delete State
+    const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
+
     useEffect(() => {
         if (courseId) {
             getCourseReviews(courseId).then(setReviews);
@@ -35,7 +44,7 @@ export default function CourseDetail() {
         if (!newReviewText.trim()) return alert("Review text cannot be empty.");
 
         setIsSubmitting(true);
-        const success = await addReview({
+        const result = await addReview({
             courseId,
             userId: user.uid,
             userName: user.displayName || "Anonymous User",
@@ -43,22 +52,66 @@ export default function CourseDetail() {
             text: newReviewText,
         });
 
-        if (success) {
+        if (result.success) {
             setNewReviewText("");
             setNewReviewRating(5);
             // Re-fetch reviews to update the UI
             getCourseReviews(courseId).then(setReviews);
         } else {
-            alert("Failed to add review. Please try again.");
+            alert(`Failed to add review: ${result.error}`);
         }
         setIsSubmitting(false);
     };
 
-    const baseReviewsCount = 2000;
-    const totalRatingPoints = course ? (course.rating * baseReviewsCount) + reviews.reduce((sum, r) => sum + r.rating, 0) : 0;
-    const totalReviewsCount = course ? baseReviewsCount + reviews.length : 1;
-    const dynamicRating = course ? totalRatingPoints / totalReviewsCount : 0;
-    const formattedReviewsCount = (totalReviewsCount / 1000).toFixed(1) + "k";
+    const handleEditStart = (review: Review) => {
+        setEditingReviewId(review.id!);
+        setEditReviewText(review.text);
+        setEditReviewRating(review.rating);
+    };
+
+    const handleEditCancel = () => {
+        setEditingReviewId(null);
+        setEditReviewText("");
+        setEditReviewRating(5);
+    };
+
+    const handleUpdateReview = async (reviewId: string) => {
+        if (!editReviewText.trim()) return alert("Review text cannot be empty.");
+        setIsSubmitting(true);
+        const result = await updateReview(reviewId, editReviewText, editReviewRating);
+        if (result.success) {
+            handleEditCancel();
+            getCourseReviews(courseId).then(setReviews);
+        } else {
+            alert(`Failed to update review: ${result.error}`);
+        }
+        setIsSubmitting(false);
+    };
+
+    const handleDeleteReview = (reviewId: string) => {
+        setReviewToDelete(reviewId);
+    };
+
+    const confirmDeleteReview = async () => {
+        if (!reviewToDelete) return;
+        setIsSubmitting(true);
+        const result = await deleteReview(reviewToDelete);
+        if (result.success) {
+            getCourseReviews(courseId).then(setReviews);
+        } else {
+            alert(`Failed to delete review: ${result.error}`);
+        }
+        setIsSubmitting(false);
+        setReviewToDelete(null);
+    };
+
+    const realReviewsCount = reviews.length;
+    const realRatingPoints = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const dynamicRating = course ? (realReviewsCount > 0 ? realRatingPoints / realReviewsCount : course.rating) : 0;
+    // We add 124 as a placeholder if there are absolutely no reviews, so it doesn't say "0 reviews" for a popular course initially
+    const totalReviewsCount = realReviewsCount > 0 ? realReviewsCount : 124;
+    const formattedReviewsCount = totalReviewsCount >= 1000 ? (totalReviewsCount / 1000).toFixed(1) + "k" : totalReviewsCount.toString();
+    const hasReviewed = user && reviews.some(r => r.userId === user.uid);
 
 
     if (!course) {
@@ -210,6 +263,8 @@ export default function CourseDetail() {
                                 <h3 className="text-xl font-bold text-white mb-6">Write a Review</h3>
                                 {!user ? (
                                     <p className="text-neutral-400">Please <a href="/login" className="text-accent hover:underline">log in</a> to leave a review.</p>
+                                ) : hasReviewed ? (
+                                    <p className="text-accent font-medium bg-accent/10 border border-accent/20 p-4 rounded-xl">You have already reviewed this course. Thank you for your feedback!</p>
                                 ) : (
                                     <form onSubmit={handleSubmitReview}>
                                         <div className="mb-4">
@@ -256,25 +311,86 @@ export default function CourseDetail() {
                                 ) : (
                                     reviews.map((review) => (
                                         <div key={review.id} className="bg-neutral-950 border border-neutral-800 p-8 rounded-3xl">
-                                            <div className="flex items-center gap-4 mb-4">
-                                                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-lg font-bold text-white border border-neutral-700">
-                                                    {review.userName.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-white">{review.userName}</h4>
-                                                    <div className="flex items-center gap-1 mt-1">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-accent text-accent' : 'text-neutral-700'}`} />
-                                                        ))}
-                                                        <span className="text-neutral-500 text-xs ml-2">
-                                                            {review.createdAt?.toDate ? new Date(review.createdAt.toDate()).toLocaleDateString() : 'Just now'}
-                                                        </span>
+                                            {editingReviewId === review.id ? (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <h4 className="font-bold text-white">Edit Your Review</h4>
+                                                        <button onClick={handleEditCancel} className="text-neutral-500 hover:text-white transition-colors">
+                                                            <X className="w-5 h-5" />
+                                                        </button>
                                                     </div>
+                                                    <div className="flex gap-2" onMouseLeave={() => setEditHoveredRating(0)}>
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                type="button"
+                                                                onClick={() => setEditReviewRating(star)}
+                                                                onMouseEnter={() => setEditHoveredRating(star)}
+                                                                className="focus:outline-none transition-transform hover:scale-110"
+                                                            >
+                                                                <Star className={`w-6 h-6 transition-colors duration-200 ${(editHoveredRating || editReviewRating) >= star ? 'fill-accent text-accent' : 'text-neutral-700'}`} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <textarea
+                                                        value={editReviewText}
+                                                        onChange={(e) => setEditReviewText(e.target.value)}
+                                                        className="w-full bg-neutral-900 border border-neutral-800 text-white rounded-xl focus:ring-accent focus:border-accent block p-4 outline-none min-h-[100px] resize-none"
+                                                        placeholder="Update your review..."
+                                                        required
+                                                    ></textarea>
+                                                    <button
+                                                        onClick={() => handleUpdateReview(review.id!)}
+                                                        disabled={isSubmitting}
+                                                        className="px-6 py-2 rounded-full bg-accent text-white font-bold hover:bg-accent-light transition-colors disabled:opacity-50"
+                                                    >
+                                                        {isSubmitting ? "Saving..." : "Save Changes"}
+                                                    </button>
                                                 </div>
-                                            </div>
-                                            <p className="text-neutral-300 font-light leading-relaxed">
-                                                {review.text}
-                                            </p>
+                                            ) : (
+                                                <>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center">
+                                                            <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-lg font-bold text-white">
+                                                                {review.userName.charAt(0)}
+                                                            </div>
+                                                            <div className="ml-4">
+                                                                <h4 className="font-bold text-white">{review.userName}</h4>
+                                                                <div className="flex items-center gap-1 mt-1">
+                                                                    {[...Array(5)].map((_, i) => (
+                                                                        <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-accent text-accent' : 'text-neutral-700'}`} />
+                                                                    ))}
+                                                                    <span className="text-neutral-500 text-xs ml-2">
+                                                                        {review.createdAt?.toDate ? new Date(review.createdAt.toDate()).toLocaleDateString() : 'Just now'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {user && user.uid === review.userId && (
+                                                            <div className="flex items-center gap-2">
+                                                                <button 
+                                                                    onClick={() => handleEditStart(review)}
+                                                                    className="p-2 text-neutral-400 hover:text-accent bg-neutral-900 hover:bg-neutral-800 rounded-full transition-colors"
+                                                                    title="Edit Review"
+                                                                >
+                                                                    <Edit2 className="w-4 h-4" />
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDeleteReview(review.id!)}
+                                                                    className="p-2 text-neutral-400 hover:text-red-500 bg-neutral-900 hover:bg-neutral-800 rounded-full transition-colors"
+                                                                    title="Delete Review"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-neutral-300 font-light leading-relaxed">
+                                                        {review.text}
+                                                    </p>
+                                                </>
+                                            )}
                                         </div>
                                     ))
                                 )}
@@ -285,6 +401,37 @@ export default function CourseDetail() {
 
                 <Footer />
             </SmoothScroll>
+
+            {/* Custom Delete Confirmation Modal */}
+            {reviewToDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-[32px] max-w-md w-full shadow-2xl animate-slide-up">
+                        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
+                            <Trash2 className="w-6 h-6 text-red-500" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Delete Review</h3>
+                        <p className="text-neutral-400 mb-8 leading-relaxed">
+                            Are you sure you want to delete this review? This action cannot be undone and your review will be permanently removed.
+                        </p>
+                        <div className="flex items-center gap-4 justify-end">
+                            <button
+                                onClick={() => setReviewToDelete(null)}
+                                disabled={isSubmitting}
+                                className="px-6 py-3 rounded-full font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDeleteReview}
+                                disabled={isSubmitting}
+                                className="px-6 py-3 rounded-full bg-red-500 text-white font-bold hover:bg-red-600 transition-colors disabled:opacity-50"
+                            >
+                                {isSubmitting ? "Deleting..." : "Delete Review"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

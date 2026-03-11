@@ -189,26 +189,65 @@ export const addReview = async (reviewData: Omit<Review, 'id' | 'createdAt'>) =>
             ...reviewData,
             createdAt: serverTimestamp(),
         });
-        return true;
-    } catch (error) {
+        return { success: true };
+    } catch (error: any) {
         console.error("Error adding review:", error);
-        return false;
+        return { success: false, error: error.message };
+    }
+};
+
+export const updateReview = async (reviewId: string, text: string, rating: number) => {
+    try {
+        const reviewRef = doc(db, "reviews", reviewId);
+        await updateDoc(reviewRef, {
+            text,
+            rating,
+            // We intentionally don't update createdAt so it keeps its original sort position
+        });
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error updating review:", error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const deleteReview = async (reviewId: string) => {
+    try {
+        const reviewRef = doc(db, "reviews", reviewId);
+        // Note: You must import deleteDoc from 'firebase/firestore'
+        await import('firebase/firestore').then(({ deleteDoc }) => deleteDoc(reviewRef));
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error deleting review:", error);
+        return { success: false, error: error.message };
     }
 };
 
 export const getCourseReviews = async (courseId: string) => {
     try {
         const reviewsRef = collection(db, "reviews");
-        const q = query(reviewsRef, where("courseId", "==", courseId), orderBy("createdAt", "desc"));
+        // Removed orderBy("createdAt", "desc") to prevent composite index requirement
+        const q = query(reviewsRef, where("courseId", "==", courseId));
         const querySnapshot = await getDocs(q);
 
         const reviews: Review[] = [];
         querySnapshot.forEach((doc) => {
-            reviews.push({ id: doc.id, ...doc.data() } as Review);
+            reviews.push({ id: doc.id, ...doc.data({ serverTimestamps: "estimate" }) } as Review);
         });
+        
+        // Sort in memory
+        reviews.sort((a, b) => {
+            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : Date.now());
+            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : Date.now());
+            return timeB - timeA;
+        });
+        
         return reviews;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching course reviews:", error);
+        if (typeof window !== 'undefined') {
+            alert("Firebase Fetch Error: " + error.message);
+        }
         return [];
     }
 };
@@ -216,14 +255,24 @@ export const getCourseReviews = async (courseId: string) => {
 export const getTopReviews = async (limitCount = 5) => {
     try {
         const reviewsRef = collection(db, "reviews");
-        const q = query(reviewsRef, orderBy("rating", "desc"), orderBy("createdAt", "desc"), limit(limitCount));
+        // Removed orderBy("createdAt", "desc") to prevent composite index requirement
+        const q = query(reviewsRef, orderBy("rating", "desc"), limit(limitCount * 2));
         const querySnapshot = await getDocs(q);
 
         const reviews: Review[] = [];
         querySnapshot.forEach((doc) => {
-            reviews.push({ id: doc.id, ...doc.data() } as Review);
+            reviews.push({ id: doc.id, ...doc.data({ serverTimestamps: "estimate" }) } as Review);
         });
-        return reviews;
+        
+        // Sort in memory to get the newest top-rated reviews
+        reviews.sort((a, b) => {
+            if (b.rating !== a.rating) return b.rating - a.rating;
+            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt?.seconds ? a.createdAt.seconds * 1000 : Date.now());
+            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt?.seconds ? b.createdAt.seconds * 1000 : Date.now());
+            return timeB - timeA;
+        });
+
+        return reviews.slice(0, limitCount);
     } catch (error) {
         console.error("Error fetching top reviews:", error);
         return [];
