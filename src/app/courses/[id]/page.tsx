@@ -3,13 +3,17 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { courses } from "@/data/courses";
-import { getCourseReviews, addReview, updateReview, deleteReview, Review } from "@/lib/db";
+import { getCourseReviews, addReview, updateReview, deleteReview, Review, recordPurchase } from "@/lib/db";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { TopNav, BottomNav } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, Trash2, X } from "lucide-react";
+import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, Trash2, X, Check, Loader2, Sparkles, GraduationCap, Shield } from "lucide-react";
+import Script from "next/script";
+import JSConfetti from 'js-confetti';
+import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/razorpay";
 
 export default function CourseDetail() {
     const params = useParams();
@@ -17,6 +21,7 @@ export default function CourseDetail() {
     const course = courses.find(c => c.id === courseId);
     
     const { user } = useAuth();
+    const { convertPrice, symbol, currency } = useCurrency();
     const [reviews, setReviews] = useState<Review[]>([]);
     const [newReviewText, setNewReviewText] = useState("");
     const [newReviewRating, setNewReviewRating] = useState(5);
@@ -32,11 +37,76 @@ export default function CourseDetail() {
     // Delete State
     const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
+    // Payment/Enrollment State
+    const [isEnrolled, setIsEnrolled] = useState(false);
+    const [showOrderAccepted, setShowOrderAccepted] = useState(false);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [paymentId, setPaymentId] = useState<string | null>(null);
+
     useEffect(() => {
         if (courseId) {
             getCourseReviews(courseId).then(setReviews);
         }
     }, [courseId]);
+
+    const handleEnrollment = async () => {
+        if (!user) {
+            alert("Please login to enroll in this course.");
+            return;
+        }
+
+        if (isEnrolled) return; // Already enrolled
+
+        setIsProcessingPayment(true);
+
+        try {
+            // Convert price to INR paise (Razorpay requires smallest currency unit)
+            const priceInINR = course!.price * 83; // USD to INR
+            const amountInPaise = Math.round(priceInINR * 100);
+
+            // Step 1: Create order on server
+            const order = await createRazorpayOrder(
+                amountInPaise,
+                "INR",
+                `course_${courseId}_${Date.now()}`,
+                { courseId, courseName: course!.name, userId: user.uid }
+            );
+
+            // Step 2: Open Razorpay checkout
+            const result = await openRazorpayCheckout({
+                orderId: order.id,
+                amount: order.amount,
+                currency: order.currency,
+                courseName: course!.name,
+                description: `Enrollment for ${course!.name}`,
+                userName: user.displayName || "Student",
+                userEmail: user.email || "",
+            });
+
+            // Step 3: Payment succeeded
+            setPaymentId(result.razorpay_payment_id);
+            setIsEnrolled(true);
+            setShowOrderAccepted(true);
+
+            // Record purchase in Firestore
+            const coinsEarned = Math.floor(priceInINR * 0.10);
+            await recordPurchase(user.uid, courseId, course!.price, "INR", coinsEarned, 0);
+
+            // Celebration confetti!
+            const jsConfetti = new JSConfetti();
+            jsConfetti.addConfetti({
+                emojis: ['🎓', '🎉', '🌟', '✨', '💻'],
+                confettiNumber: 100,
+            });
+
+        } catch (error: any) {
+            if (error.message !== "Payment cancelled by user") {
+                alert("Payment failed: " + error.message);
+            }
+        } finally {
+            setIsProcessingPayment(false);
+        }
+    };
 
     const handleSubmitReview = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,7 +125,6 @@ export default function CourseDetail() {
         if (result.success) {
             setNewReviewText("");
             setNewReviewRating(5);
-            // Re-fetch reviews to update the UI
             getCourseReviews(courseId).then(setReviews);
         } else {
             alert(`Failed to add review: ${result.error}`);
@@ -108,7 +177,6 @@ export default function CourseDetail() {
     const realReviewsCount = reviews.length;
     const realRatingPoints = reviews.reduce((sum, r) => sum + r.rating, 0);
     const dynamicRating = course ? (realReviewsCount > 0 ? realRatingPoints / realReviewsCount : course.rating) : 0;
-    // We add 124 as a placeholder if there are absolutely no reviews, so it doesn't say "0 reviews" for a popular course initially
     const totalReviewsCount = realReviewsCount > 0 ? realReviewsCount : 124;
     const formattedReviewsCount = totalReviewsCount >= 1000 ? (totalReviewsCount / 1000).toFixed(1) + "k" : totalReviewsCount.toString();
     const hasReviewed = user && reviews.some(r => r.userId === user.uid);
@@ -122,8 +190,11 @@ export default function CourseDetail() {
         );
     }
 
+    const displayPrice = convertPrice(course.price);
+
     return (
         <main className="min-h-screen bg-primary text-secondary selection:bg-accent selection:text-white">
+            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
             <CustomCursor />
             <TopNav />
             <BottomNav />
@@ -177,7 +248,7 @@ export default function CourseDetail() {
 
                             <div className="relative z-10 flex flex-col h-full justify-end pt-40">
                                 <div className="flex items-center justify-between mb-8">
-                                    <span className="text-5xl font-bold text-white">${course.price}</span>
+                                    <span className="text-5xl font-bold text-white">{symbol}{displayPrice.toLocaleString()}</span>
                                     <div className="flex items-center gap-1 text-accent">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} className={`w-5 h-5 ${i < Math.round(dynamicRating) ? 'fill-current' : 'text-neutral-600'}`} />
@@ -186,11 +257,30 @@ export default function CourseDetail() {
                                     </div>
                                 </div>
 
-                                <button className="w-full py-5 rounded-full bg-accent text-white font-bold text-lg hover:bg-accent-light transition-colors mb-4 flex items-center justify-center gap-2 group/btn">
-                                    Enroll Now
-                                    <PlayCircle className="w-5 h-5 transition-transform group-hover/btn:scale-110" />
+                                <button
+                                    onClick={handleEnrollment}
+                                    disabled={isProcessingPayment}
+                                    className={`w-full py-5 rounded-full font-bold text-lg transition-all mb-4 flex items-center justify-center gap-2 group/btn ${
+                                        isEnrolled
+                                            ? 'bg-green-500 text-white hover:bg-green-600'
+                                            : 'bg-accent text-white hover:bg-accent-light hover:shadow-[0_0_40px_rgba(255,94,0,0.3)]'
+                                    } disabled:opacity-70 disabled:cursor-not-allowed`}
+                                >
+                                    {isProcessingPayment ? (
+                                        <><Loader2 className="w-5 h-5 animate-spin" /> Creating Order...</>
+                                    ) : isEnrolled ? (
+                                        <><CheckCircle2 className="w-5 h-5" /> Enrolled Successfully</>
+                                    ) : (
+                                        <><PlayCircle className="w-5 h-5 transition-transform group-hover/btn:scale-110" /> Enroll Now</>
+                                    )}
                                 </button>
-                                <p className="text-center text-xs text-neutral-500 font-light">30-day money-back guarantee. Full lifetime access.</p>
+                                <div className="flex items-center justify-center gap-4 mt-2">
+                                    <p className="text-center text-xs text-neutral-500 font-light flex items-center gap-1.5">
+                                        <Shield className="w-3.5 h-3.5" /> Secure payment via Razorpay
+                                    </p>
+                                    <span className="text-neutral-700 text-xs">•</span>
+                                    <p className="text-center text-xs text-neutral-500 font-light">30-day money-back guarantee</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -429,6 +519,56 @@ export default function CourseDetail() {
                                 {isSubmitting ? "Deleting..." : "Delete Review"}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Order Accepted Success Modal — Premium Theme */}
+            {showOrderAccepted && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
+                    <div className="bg-neutral-900 border border-accent/20 p-10 rounded-[40px] max-w-lg w-full shadow-[0_0_80px_rgba(255,94,0,0.15)] flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
+                        {/* Animated success ring */}
+                        <div className="w-28 h-28 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-8 relative">
+                            <div className="absolute inset-0 rounded-full border-2 border-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
+                            <div className="absolute inset-2 rounded-full border border-accent/20 animate-pulse" style={{ animationDuration: '3s' }} />
+                            <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
+                                <Check className="w-10 h-10 text-accent" />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-3">
+                            <Sparkles className="w-5 h-5 text-accent" />
+                            <span className="text-accent font-bold text-sm uppercase tracking-widest">Payment Successful</span>
+                            <Sparkles className="w-5 h-5 text-accent" />
+                        </div>
+
+                        <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">You&apos;re Enrolled!</h2>
+                        
+                        <p className="text-neutral-400 mb-6 leading-relaxed max-w-sm">
+                            Congratulations! You&apos;re now enrolled in <strong className="text-white">{course.name}</strong>. Your learning journey starts now.
+                        </p>
+
+                        {paymentId && (
+                            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl px-5 py-3 mb-6 w-full">
+                                <p className="text-xs text-neutral-500 mb-1">Transaction ID</p>
+                                <p className="text-sm text-neutral-300 font-mono truncate">{paymentId}</p>
+                            </div>
+                        )}
+
+                        <div className="bg-accent/10 border border-accent/20 rounded-2xl p-5 w-full mb-8">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                                <GraduationCap className="w-6 h-6 text-accent" />
+                                <span className="text-accent font-bold">Course Unlocked</span>
+                            </div>
+                            <p className="text-sm text-accent/70">Full lifetime access • Certificate included</p>
+                        </div>
+
+                        <button
+                            onClick={() => setShowOrderAccepted(false)}
+                            className="w-full py-4 rounded-full bg-accent text-white font-bold hover:bg-accent-light transition-all hover:shadow-[0_0_30px_rgba(255,94,0,0.3)]"
+                        >
+                            Start Learning Now
+                        </button>
                     </div>
                 </div>
             )}

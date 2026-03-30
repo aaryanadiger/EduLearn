@@ -3,9 +3,11 @@
 import { useCart } from "@/context/CartContext";
 import { X, Trash2, ShoppingCart } from "lucide-react";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Cart() {
     const { cartItems, removeFromCart, isCartOpen, setIsCartOpen, cartTotal } = useCart();
+    const router = useRouter();
 
     // Prevent body scroll when cart is open
     useEffect(() => {
@@ -15,6 +17,11 @@ export default function Cart() {
             document.body.style.overflow = "";
         }
     }, [isCartOpen]);
+
+    const handleCheckout = () => {
+        setIsCartOpen(false);
+        router.push("/cart");
+    };
 
     if (!isCartOpen) return null;
 
@@ -78,8 +85,9 @@ export default function Cart() {
                         <span className="text-2xl font-bold font-syncopate text-white">${cartTotal}</span>
                     </div>
                     <button
+                        onClick={handleCheckout}
                         disabled={cartItems.length === 0}
-                        className="w-full bg-accent hover:bg-accent-light text-black font-bold py-4 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm"
+                        className="w-full bg-accent hover:bg-accent-light text-white font-bold py-4 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm hover:shadow-[0_0_30px_rgba(255,94,0,0.2)]"
                     >
                         Secure Checkout
                     </button>
@@ -88,3 +96,4 @@ export default function Cart() {
         </>
     );
 }
+

@@ -1,7 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { GraduationCap, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { useState } from "react";
+import LegalModal from "./LegalModal";
+import { TERMS_CONTENT, PRIVACY_CONTENT } from "@/lib/legalContent";
 
 export default function Footer() {
+    const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; title: string; content: string }>({
+        isOpen: false,
+        title: "",
+        content: ""
+    });
+
     return (
         <footer className="bg-black text-white py-16 border-t border-neutral-900 relative z-10 w-full">
             <div className="max-w-7xl mx-auto px-6">
@@ -56,11 +67,17 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-neutral-900 text-sm text-neutral-600">
                     <p>&copy; 2025 EduLearn. All rights reserved.</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                        <button onClick={() => setModalConfig({ isOpen: true, title: "Privacy Policy", content: PRIVACY_CONTENT })} className="hover:text-white transition-colors">Privacy Policy</button>
+                        <button onClick={() => setModalConfig({ isOpen: true, title: "Terms and Conditions", content: TERMS_CONTENT })} className="hover:text-white transition-colors">Terms of Service</button>
                     </div>
                 </div>
             </div>
+            <LegalModal 
+                isOpen={modalConfig.isOpen} 
+                onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} 
+                title={modalConfig.title} 
+                content={modalConfig.content} 
+            />
         </footer>
     );
 }

@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      {/* EduLearn v1.1.0 */}
+      {/* EduLearn v2.0.0 */}
       <body
         className={`${outfit.variable} ${syncopate.variable} antialiased`}
       >
@@ -49,7 +49,7 @@ export default function RootLayout({
                 className="fixed bottom-1 left-1 z-[9999] text-[10px] text-white/0 hover:text-white/40 transition-colors duration-300 select-none pointer-events-auto font-mono"
                 title="EduLearn Build Version"
               >
-                v1.1.0
+                v2.0.0
               </div>
             </CurrencyProvider>
           </CartProvider>
