@@ -1,25 +1,43 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { courses } from "@/data/courses";
 import { Clock, BookOpen, Users, Globe } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { RegionSelector } from "@/components/RegionSelector";
+import ModuleSelectionModal from "@/components/ModuleSelectionModal";
 
 export default function DeepDiveSection() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const { addToCart, cartItems } = useCart();
     const { currency, setCurrency, convertPrice, symbol } = useCurrency();
 
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeCourse, setActiveCourse] = useState<any>(null);
+
+    const handleAddToCartClick = (e: React.MouseEvent, course: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setActiveCourse(course);
+        setIsModalOpen(true);
+    };
+
+    const handleModalConfirm = (selectedModules: string[]) => {
+        if (activeCourse) {
+            addToCart(activeCourse, selectedModules);
+        }
+    };
+
     return (
         <section id="courses" className="max-w-7xl mx-auto py-24 px-6 relative z-10 w-full">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                 <div>
-                    <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-4">
-                        Deep Dive <span className="text-accent">Learning</span>
+                    <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-4 uppercase" style={{ fontFamily: 'var(--font-syncopate)' }}>
+                        Recommended <span className="text-accent">Courses</span>
                     </h2>
-                    <p className="text-xl text-neutral-400 max-w-2xl">
+                    <p className="text-xl text-neutral-400 max-w-2xl font-light">
                         Explore our comprehensive programs designed to transform your career.
                     </p>
                 </div>
@@ -83,13 +101,10 @@ export default function DeepDiveSection() {
                                 </div>
 
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // prevent clicking the card underneath (if card becomes clickable later)
-                                        addToCart(course, []);
-                                    }}
+                                    onClick={(e) => handleAddToCartClick(e, course)}
                                     className="mt-4 w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-accent hover:text-white transition-colors uppercase tracking-widest text-sm"
                                 >
-                                    {cartItems.some(item => item.id === course.id) ? "In Cart" : "Add to Cart"}
+                                    {cartItems.some(item => item.id === course.id) ? "Customize / In Cart" : "Enroll / Customize"}
                                 </button>
                             </div>
                         </div>
@@ -97,7 +112,15 @@ export default function DeepDiveSection() {
                 </div>
             </div>
 
-            {/* Mobile Navigation Controls - Removed for Auto Scroll */}
+            {/* Module Selection Modal */}
+            {activeCourse && (
+                <ModuleSelectionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={handleModalConfirm}
+                    course={activeCourse}
+                />
+            )}
         </section >
     );
 }

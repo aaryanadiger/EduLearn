@@ -15,6 +15,7 @@ import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, T
 import Script from "next/script";
 import JSConfetti from 'js-confetti';
 import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/razorpay";
+import ModuleSelectionModal from "@/components/ModuleSelectionModal";
 
 export default function CourseDetail() {
     const params = useParams();
@@ -51,6 +52,9 @@ export default function CourseDetail() {
     const [showOrderAccepted, setShowOrderAccepted] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [paymentId, setPaymentId] = useState<string | null>(null);
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         if (courseId) {
@@ -210,11 +214,12 @@ export default function CourseDetail() {
     };
 
     const handleAddToCart = () => {
-        if (selectedModules.length === 0) {
-            alert("Please select at least one module.");
-            return;
-        }
-        addToCart(course, selectedModules);
+        setIsModalOpen(true);
+    };
+
+    const handleModalConfirm = (modules: string[]) => {
+        setSelectedModules(modules);
+        addToCart(course, modules);
     };
 
     const handleSubmitReview = async (e: React.FormEvent) => {
@@ -776,6 +781,17 @@ export default function CourseDetail() {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* Module Selection Modal */}
+            {course && (
+                <ModuleSelectionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={handleModalConfirm}
+                    course={course}
+                    initialSelectedModules={selectedModules}
+                />
             )}
         </main>
     );

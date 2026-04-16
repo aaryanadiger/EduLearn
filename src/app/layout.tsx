@@ -4,6 +4,7 @@ import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { TopNav, BottomNav } from "@/components/Navbar";
+import Cart from "@/components/Cart";
 import Edubot from "@/components/Edubot";
 import "./globals.css";
 
@@ -33,7 +34,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      {/* EduLearn v2.0.0 */}
       <body
         className={`${outfit.variable} ${syncopate.variable} antialiased`}
       >
@@ -42,6 +42,7 @@ export default function RootLayout({
             <CurrencyProvider>
               <TopNav />
               <BottomNav />
+              <Cart />
               <Edubot />
               {children}
               {/* Developer version tag — invisible, hover to reveal */}
@@ -49,7 +50,7 @@ export default function RootLayout({
                 className="fixed bottom-1 left-1 z-[9999] text-[10px] text-white/0 hover:text-white/40 transition-colors duration-300 select-none pointer-events-auto font-mono"
                 title="EduLearn Build Version"
               >
-                v2.0.0
+                v2.3.0
               </div>
             </CurrencyProvider>
           </CartProvider>

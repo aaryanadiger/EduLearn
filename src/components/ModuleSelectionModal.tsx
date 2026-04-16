@@ -101,36 +101,45 @@ export default function ModuleSelectionModal({
                         {course.modules.map((mod, i) => (
                             <label
                                 key={i}
-                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer group ${
+                                className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all cursor-pointer group relative overflow-hidden ${
                                     selectedModules.includes(mod)
-                                        ? "bg-accent/5 border-accent/30"
-                                        : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
+                                        ? "bg-accent/10 border-accent shadow-[0_0_20px_rgba(255,94,0,0.1)]"
+                                        : "bg-neutral-900 border-neutral-800 hover:border-neutral-700"
                                 }`}
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
                                         selectedModules.includes(mod)
-                                            ? "bg-accent border-accent"
+                                            ? "bg-accent border-accent scale-110"
                                             : "bg-transparent border-neutral-700 group-hover:border-neutral-500"
                                     }`}>
-                                        {selectedModules.includes(mod) && <Check className="w-4 h-4 text-white" />}
+                                        {selectedModules.includes(mod) && <Check className="w-4 h-4 text-white stroke-[3px]" />}
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-xs font-bold text-neutral-500">
+                                        <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-xs font-bold text-neutral-400 group-hover:text-white transition-colors">
                                             {i + 1}
                                         </div>
-                                        <span className={`font-medium transition-colors ${selectedModules.includes(mod) ? "text-white" : "text-neutral-400"}`}>
+                                        <span className={`font-bold transition-all ${selectedModules.includes(mod) ? "text-white text-lg" : "text-neutral-400"}`}>
                                             {mod}
                                         </span>
                                     </div>
                                 </div>
                                 <input
                                     type="checkbox"
-                                    className="hidden"
+                                    className="sr-only"
                                     checked={selectedModules.includes(mod)}
                                     onChange={() => toggleModule(mod)}
                                 />
-                                <PlayCircle className={`w-5 h-5 transition-opacity ${selectedModules.includes(mod) ? "opacity-40 text-accent" : "opacity-0"}`} />
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <span className={`text-[10px] font-black uppercase tracking-tighter transition-opacity ${selectedModules.includes(mod) ? "opacity-40 text-accent" : "opacity-0"}`}>
+                                        Included
+                                    </span>
+                                    <PlayCircle className={`w-5 h-5 transition-all ${selectedModules.includes(mod) ? "text-accent scale-110" : "text-neutral-800 opacity-20"}`} />
+                                </div>
+                                
+                                {selectedModules.includes(mod) && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent pointer-events-none" />
+                                )}
                             </label>
                         ))}
                     </div>
