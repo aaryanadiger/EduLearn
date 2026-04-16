@@ -14,6 +14,7 @@ export interface Course {
     modules: string[];
     languages: string[];
     rating: number;
+    youtubeId?: string;
 }
 
 export const courses: Course[] = [
@@ -32,7 +33,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1547658719-da2b51159128?auto=format&fit=crop&q=80&w=800',
         modules: ['HTML/CSS', 'JavaScript', 'React', 'Node.js'],
         languages: ['English', 'Hindi'],
-        rating: 4.8
+        rating: 4.8,
+        youtubeId: 'mU6an7qMCsc' // Web Dev roadmap
     },
     {
         id: 'course-2',
@@ -49,7 +51,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bfce8?auto=format&fit=crop&q=80&w=800',
         modules: ['Python Basics', 'OOP', 'Data Structures', 'Projects'],
         languages: ['English', 'Hindi'],
-        rating: 4.6
+        rating: 4.6,
+        youtubeId: 'rfscVS0vtbw' // Python for beginners
     },
     {
         id: 'course-3',
@@ -66,7 +69,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
         modules: ['ES6+', 'Async JS', 'Frameworks', 'Testing'],
         languages: ['English'],
-        rating: 4.9
+        rating: 4.9,
+        youtubeId: 'hdI2bqOjy3c' // JS Advanced
     },
     {
         id: 'course-4',
@@ -83,7 +87,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
         modules: ['Python Basics', 'Pandas', 'Machine Learning', 'Visualization'],
         languages: ['English', 'Hindi'],
-        rating: 4.7
+        rating: 4.7,
+        youtubeId: 'ua-CiDNNj30' // Data Science tutorial
     },
     {
         id: 'course-5',
@@ -100,7 +105,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1518932945647-7a1c969f8be2?auto=format&fit=crop&q=80&w=800',
         modules: ['ML Basics', 'Algorithms', 'Deep Learning', 'Deployment'],
         languages: ['English'],
-        rating: 4.8
+        rating: 4.8,
+        youtubeId: 'GwIo3gDZCVQ' // ML Full Course
     },
     {
         id: 'course-6',
@@ -117,7 +123,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
         modules: ['Matplotlib', 'Seaborn', 'Tableau', 'D3.js'],
         languages: ['English', 'Hindi'],
-        rating: 4.5
+        rating: 4.5,
+        youtubeId: 'fS7Stqp4dF4' // Data Viz tips
     },
     {
         id: 'course-7',
@@ -134,7 +141,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800',
         modules: ['Design Principles', 'Figma', 'Prototyping', 'User Research'],
         languages: ['English', 'Hindi'],
-        rating: 4.9
+        rating: 4.9,
+        youtubeId: 'c9Wg6ndoxag' // UI/UX design
     },
     {
         id: 'course-8',
@@ -151,7 +159,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=800',
         modules: ['Typography', 'Color Theory', 'Layout', 'Branding'],
         languages: ['English', 'Hindi'],
-        rating: 4.4
+        rating: 4.4,
+        youtubeId: 'Y9Odf8V3y4U' // Graphic Design
     },
     {
         id: 'course-9',
@@ -168,7 +177,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80&w=800',
         modules: ['Photoshop', 'Illustrator', 'InDesign', 'Projects'],
         languages: ['English'],
-        rating: 4.6
+        rating: 4.6,
+        youtubeId: 'm_Uf0wI8QvE' // Adobe Creative Cloud
     },
     {
         id: 'course-10',
@@ -185,7 +195,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
         modules: ['Strategy Basics', 'Planning', 'Analysis', 'Execution'],
         languages: ['English', 'Hindi'],
-        rating: 4.7
+        rating: 4.7,
+        youtubeId: 'MLfAsSAtKCQ' // Business Strategy
     },
     {
         id: 'course-11',
@@ -202,7 +213,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&q=80&w=800',
         modules: ['Business Planning', 'Funding', 'Marketing', 'Scaling'],
         languages: ['English'],
-        rating: 4.8
+        rating: 4.8,
+        youtubeId: 'lJjILQu2xM8' // Entrepreneurship
     },
     {
         id: 'course-12',
@@ -219,7 +231,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&q=80&w=800',
         modules: ['Agile', 'Scrum', 'PM Tools', 'Leadership'],
         languages: ['English', 'Hindi'],
-        rating: 4.6
+        rating: 4.6,
+        youtubeId: '98_VdZpYkC0' // Project Management
     },
     {
         id: 'course-13',
@@ -236,7 +249,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?auto=format&fit=crop&q=80&w=800',
         modules: ['SEO', 'Social Media', 'Content Marketing', 'Analytics'],
         languages: ['English', 'Hindi'],
-        rating: 4.9
+        rating: 4.9,
+        youtubeId: 'nU-IIXBWln4' // Digital Marketing
     },
     {
         id: 'course-14',
@@ -253,7 +267,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800',
         modules: ['Facebook', 'Instagram', 'LinkedIn', 'Campaigns'],
         languages: ['English'],
-        rating: 4.5
+        rating: 4.5,
+        youtubeId: '767vGv6X2_Y' // Social Media Marketing
     },
     {
         id: 'course-15',
@@ -270,7 +285,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1493612276216-ee3925520721?auto=format&fit=crop&q=80&w=800',
         modules: ['Content Strategy', 'Copywriting', 'SEO', 'Distribution'],
         languages: ['English', 'Hindi'],
-        rating: 4.7
+        rating: 4.7,
+        youtubeId: 'oaY7vAtV8m4' // Content Marketing
     },
     {
         id: 'course-16',
@@ -287,7 +303,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=800',
         modules: ['React Native', 'APIs', 'Publishing', 'Performance'],
         languages: ['English', 'Hindi'],
-        rating: 4.8
+        rating: 4.8,
+        youtubeId: '0-S5a0eXPoc' // React Native
     },
     {
         id: 'course-17',
@@ -304,7 +321,8 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&q=80&w=800',
         modules: ['Swift Basics', 'SwiftUI', 'App Store', 'Best Practices'],
         languages: ['English'],
-        rating: 4.9
+        rating: 4.9,
+        youtubeId: 'comQ1-x2a1Q' // iOS Dev
     },
     {
         id: 'course-18',
@@ -321,6 +339,7 @@ export const courses: Course[] = [
         image: 'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?auto=format&fit=crop&q=80&w=800',
         modules: ['Kotlin', 'Jetpack Compose', 'Google Play', 'Architecture'],
         languages: ['English', 'Hindi'],
-        rating: 4.6
+        rating: 4.6,
+        youtubeId: 'fis26HvvDII' // Android Dev
     }
 ];

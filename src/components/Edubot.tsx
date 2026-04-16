@@ -12,95 +12,81 @@ interface ChatMessage {
 // ── Knowledge base for rule-based responses ────────────────────
 const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
     {
-        keywords: ["hello", "hi", "hey", "sup", "yo", "greetings"],
+        keywords: ["hello", "hi", "hey", "sup", "yo", "greetings", "start", "anybody"],
         response:
-            "Hey there! 👋 Welcome to EduLearn. I can help you with info about our courses, pricing, certificates, and more. What would you like to know?",
+            "Hey there! 👋 Welcome to EduLearn. I'm your dedicated learning assistant. I can help you explore our curriculum, understand our pricing, learn about certifications, or guide you through your career transformation. What's on your mind today?",
     },
     {
-        keywords: ["course", "courses", "program", "programs", "class", "classes", "learn", "study"],
+        keywords: ["course", "courses", "program", "programs", "class", "classes", "learn", "study", "curriculum", "catalog"],
         response:
-            "We offer a wide range of courses! 📚\n\n• **Web Development** — Full-stack bootcamp covering HTML, CSS, JS, React, Node.js\n• **Data Science** — Python, ML, Deep Learning, real-world projects\n• **UI/UX Design** — Figma, prototyping, design systems\n• **Mobile Development** — iOS & Android with React Native / Flutter\n• **Cloud Computing** — AWS, GCP, Azure certifications\n• **Cybersecurity** — Ethical hacking, network security\n• **Digital Marketing** — SEO, social media, analytics\n\nWant details on any specific course?",
+            "Our curriculum is designed by industry veterans to take you from zero to expert! 🚀\n\n• **Engineering** — Full-stack Web, Mobile (React Native/Swift/Kotlin)\n• **Intelligence** — Data Science, AI/ML, Python Mastery\n• **Creative** — UI/UX Design, Figma, Adobe Suite\n• **Strategy** — Digital Marketing, Business Strategy, Entrepreneurship\n\nEvery course includes real-world projects and 1-on-1 mentorship. Which path interests you most?",
     },
     {
-        keywords: ["price", "pricing", "cost", "fee", "fees", "expensive", "cheap", "free", "pay", "money", "afford"],
+        keywords: ["price", "pricing", "cost", "fee", "fees", "expensive", "cheap", "free", "pay", "money", "afford", "emi", "payment", "razorpay"],
         response:
-            "Our pricing is designed to be student-friendly! 💰\n\n• Individual courses start from **₹499**\n• Bundles & specializations from **₹1,999**\n• Annual all-access pass for **₹4,999**\n• We also offer **EMI options** and **scholarships** for eligible students\n\nAll courses come with a **30-day money-back guarantee**!",
+            "We believe premium education should be accessible! 💰\n\n• **Individual Specializations** — starting from **₹499**\n• **Career Bundles** — from **₹1,999**\n• **All-Access Pass** — **₹4,999/year** (Unlimited learning)\n\nWe support **all major payment methods** via Razorpay, including UPI, Cards, and **No-cost EMI**. Plus, your first module is always a free preview!",
     },
     {
-        keywords: ["certificate", "certification", "diploma", "credential", "verified"],
+        keywords: ["certificate", "certification", "diploma", "credential", "verified", "degree", "linkedin"],
         response:
-            "Yes, every course comes with a **verified certificate** upon completion! 🎓\n\nOur certificates are:\n• Industry-recognized\n• Shareable on LinkedIn\n• Include a unique verification ID\n• Signed by course instructors\n\nSome advanced courses also offer prep for external certifications (AWS, Google, etc.)",
+            "Every EduLearn graduate receives a **Premium Verified Certificate**! 🎓\n\n• **Industry-Standard**: Recognized by top tech firms.\n• **Sharable**: Add directly to your LinkedIn profile with one click.\n• **Verifiable**: Each certificate has a unique QR & ID for authenticity.\n• **Instructor Signed**: Endorsed by the industry experts who taught you.",
     },
     {
-        keywords: ["web", "frontend", "backend", "fullstack", "full-stack", "html", "css", "javascript", "react", "node"],
+        keywords: ["web", "frontend", "backend", "fullstack", "full-stack", "html", "css", "javascript", "react", "node", "next.js", "mern"],
         response:
-            "Our **Complete Web Development Bootcamp** is our most popular course! 🌐\n\nYou'll learn:\n• HTML5, CSS3, JavaScript (ES6+)\n• React.js & Next.js for frontend\n• Node.js & Express for backend\n• MongoDB & PostgreSQL databases\n• Git, deployment, and real-world projects\n\nDuration: **12 weeks** | Level: Beginner to Advanced",
+            "The **Modern Full-Stack Development** track is our flagship program! 🌐\n\nStack covered:\n• **Layer 1**: HTML5, CSS3, & Modern JavaScript (ES2024+)\n• **Layer 2**: React 19, Next.js 15, & Framer Motion\n• **Layer 3**: Node.js, Express, & Bun\n• **Layer 4**: MongoDB, PostgreSQL, & Redis\n\nDuration: **12 weeks** | Includes **5 Portfolio-ready projects**.",
     },
     {
-        keywords: ["data", "science", "python", "machine", "learning", "ml", "ai", "artificial", "intelligence", "deep"],
+        keywords: ["data", "science", "python", "machine", "learning", "ml", "ai", "artificial", "intelligence", "deep", "neural", "pandas"],
         response:
-            "Our **Data Science with Python** track is perfect for aspiring data scientists! 📊\n\nTopics covered:\n• Python, NumPy, Pandas\n• Data visualization (Matplotlib, Seaborn)\n• Machine Learning (Scikit-learn)\n• Deep Learning (TensorFlow, PyTorch)\n• Real-world Kaggle projects\n\nDuration: **16 weeks** | Includes capstone project",
+            "Master the future with our **AI & Data Science Specialist** track! 📊\n\nCurriculum:\n• **Python for Data**: NumPy, Pandas, Matplotlib\n• **ML Foundations**: Linear Regression to Random Forests\n• **Advanced AI**: Deep Learning with TensorFlow & PyTorch\n• **GPT & LLMs**: Prompt engineering and building AI agents\n\nIncludes access to our **GPU GPU enabled cloud labs**!",
     },
     {
-        keywords: ["design", "ui", "ux", "figma", "prototype", "wireframe"],
+        keywords: ["design", "ui", "ux", "figma", "prototype", "wireframe", "graphic", "adobe", "color", "typography"],
         response:
-            "Our **UI/UX Design Masterclass** will transform you into a design pro! 🎨\n\nWhat you'll master:\n• Design thinking & user research\n• Wireframing & prototyping in Figma\n• Design systems & component libraries\n• Usability testing & iteration\n• Building a portfolio with 5+ projects\n\nDuration: **10 weeks** | No prior design experience needed",
+            "Our **UI/UX Design Masterclass** focuses on creating stunning user experiences! 🎨\n\nYou'll master:\n• **Design Thinking**: User research & accessibility\n• **Visual Design**: Typography, color theory, and layout\n• **Prototyping**: Interactive flows in Figma & Spline\n• **Handover**: Working with developers and design systems\n\nGraduate with a **professional Behance portfolio**.",
     },
     {
-        keywords: ["mobile", "app", "android", "ios", "flutter", "react native", "kotlin", "swift"],
+        keywords: ["job", "career", "placement", "hire", "hiring", "internship", "interview", "resume", "employ", "salary", "work"],
         response:
-            "Go mobile with our **App Development Specialization**! 📱\n\n• **React Native** path — build cross-platform apps\n• **Flutter** path — Google's UI toolkit\n• Covers both iOS & Android deployment\n• Includes 3 real app projects\n• App Store / Play Store publishing guide\n\nDuration: **12 weeks** per path",
+            "We don't just teach code; we launch careers! 💼\n\nOur **Career Accelerator** program includes:\n• **Portfolio Surgery**: Build projects that recruiters can't ignore.\n• **Mock Interviews**: Real practice with Google & Amazon engineers.\n• **Referral Network**: Direct access to 200+ hiring partners.\n• **Negotiation Coaching**: We help you get the salary you deserve.\n\nAverage salary hike after completion is **70%**!",
     },
     {
-        keywords: ["job", "career", "placement", "hire", "hiring", "internship", "interview", "resume", "employ"],
+        keywords: ["help", "support", "contact", "reach", "email", "phone", "query", "question", "doubt", "broken", "issue", "error"],
         response:
-            "We're serious about your career! 💼\n\nOur career support includes:\n• **Resume & portfolio review** by industry experts\n• **Mock interviews** with real hiring managers\n• **Job placement assistance** — 87% placement rate\n• **Networking events** with top companies\n• Access to our **exclusive job board**\n\nMany students land roles within 2-3 months of completion!",
+            "We're here for you 24/7! 🤝\n\n• **Technical Help**: Check our [Support Portal]\n• **Billing Issues**: Email support@edulearn.com\n• **1-on-1 Mentoring**: Book a session via your dashboard\n• **Community**: Join our Discord with 10k+ fellow learners.\n\nHow can I help you right now?",
     },
     {
-        keywords: ["duration", "long", "time", "weeks", "months", "hours", "schedule", "pace", "deadline"],
+        keywords: ["thank", "thanks", "thx", "appreciate", "helpful", "great", "awesome", "cool", "nice", "love", "wow"],
         response:
-            "Our courses are flexible! ⏰\n\n• Most courses are **8-16 weeks**\n• Self-paced — learn on your own schedule\n• **Lifetime access** after enrollment\n• Estimated **5-10 hours/week** commitment\n• No hard deadlines — rewatch anytime\n\nPerfect for students and working professionals alike!",
-    },
-    {
-        keywords: ["instructor", "teacher", "mentor", "tutor", "faculty", "professor", "who teaches"],
-        response:
-            "Our instructors are top-tier! 👨‍🏫\n\n• Industry professionals from **Google, Microsoft, Apple, Meta**\n• Average **10+ years** of experience\n• Dedicated mentoring & doubt-clearing sessions\n• Weekly live Q&A sessions\n• Direct messaging support\n\nYou're learning from the best in the industry!",
-    },
-    {
-        keywords: ["support", "help", "contact", "reach", "email", "phone", "query", "question", "doubt"],
-        response:
-            "We're here to help! 🤝\n\n• **24/7 community forums** — active student & mentor community\n• **Live chat** support during business hours\n• **Email** — support@edulearn.com\n• **Doubt-clearing sessions** with mentors\n• Average response time: **under 2 hours**\n\nFeel free to ask me anything right here too!",
-    },
-    {
-        keywords: ["refund", "return", "cancel", "money back", "guarantee"],
-        response:
-            "We offer a **30-day money-back guarantee**! 💯\n\nNo questions asked — if you're not satisfied within 30 days, we'll process a full refund. Your satisfaction is our priority.",
-    },
-    {
-        keywords: ["thank", "thanks", "thx", "appreciate", "helpful", "great", "awesome", "cool", "nice"],
-        response:
-            "You're welcome! 😊 Happy to help. If you have any more questions about EduLearn, feel free to ask anytime. Good luck with your learning journey! 🚀",
-    },
-    {
-        keywords: ["bye", "goodbye", "see you", "later", "gtg", "gotta go", "exit", "close"],
-        response:
-            "Bye! 👋 It was great chatting with you. Come back anytime you need help. Happy learning! 🎉",
+            "You absolutely rock! 🚀 I'm so glad I could help. Remember, the best time to start learning was yesterday, but the second best time is **now**. Anything else you'd like to explore?",
     },
 ];
 
 const DEFAULT_RESPONSE =
-    "I'm not sure I understand that one yet! 🤔 I can help you with:\n\n• **Courses** — what we offer\n• **Pricing** — fees & plans\n• **Certificates** — what you get\n• **Career support** — job placement\n• **Schedule** — duration & pace\n\nTry asking about any of these topics!";
+    "I'm still learning that! 😅 But I'm an expert in:\n\n• **Our Courses** (Web, AI, Design, Mobile)\n• **Pricing & Plans** (EMI info)\n• **Career Support** (Placements & Resumes)\n• **Certificates** (Verification info)\n\nTry asking me about any of these, or say 'Hi' to start over!";
 
 // ── Matching logic ────────────────────────────────────────────
 function getBotResponse(userMessage: string): string {
     const lower = userMessage.toLowerCase().trim();
+    
+    // Find the best match based on keyword count
+    let bestMatch = { response: DEFAULT_RESPONSE, score: 0 };
 
     for (const entry of KNOWLEDGE_BASE) {
-        if (entry.keywords.some((kw) => lower.includes(kw))) {
-            return entry.response;
+        let currentScore = 0;
+        for (const kw of entry.keywords) {
+            if (lower.includes(kw)) {
+                currentScore++;
+            }
+        }
+        
+        if (currentScore > bestMatch.score) {
+            bestMatch = { response: entry.response, score: currentScore };
         }
     }
-    return DEFAULT_RESPONSE;
+    
+    return bestMatch.response;
 }
 
 // ── Simple markdown-ish rendering ──────────────────────────────
@@ -109,7 +95,7 @@ function renderText(text: string) {
         // Bold
         const parts = line.split(/\*\*(.*?)\*\*/g).map((part, j) =>
             j % 2 === 1 ? (
-                <strong key={j} className="font-semibold text-white">
+                <strong key={j} className="font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
                     {part}
                 </strong>
             ) : (
@@ -117,9 +103,8 @@ function renderText(text: string) {
             )
         );
         return (
-            <span key={i}>
+            <span key={i} className="block mb-1">
                 {parts}
-                {i < text.split("\n").length - 1 && <br />}
             </span>
         );
     });
@@ -133,7 +118,7 @@ export default function Edubot() {
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             role: "bot",
-            text: "Hi there! 👋 I'm EduBot, your learning assistant. Ask me about our courses, pricing, certificates, career support, or anything about EduLearn!",
+            text: "Hi there! 👋 I'm **EduBot**, your premium learning assistant. How can I help you accelerate your career today?",
         },
     ]);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -141,7 +126,11 @@ export default function Edubot() {
     // Auto-scroll on new messages
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            const scrollOptions: ScrollToOptions = {
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            };
+            scrollRef.current.scrollTo(scrollOptions);
         }
     }, [messages, isTyping]);
 
@@ -168,7 +157,7 @@ export default function Edubot() {
     };
 
     // Quick suggestions
-    const suggestions = ["Courses", "Pricing", "Certificates", "Career support"];
+    const suggestions = ["Our Catalog", "Pricing info", "Certificates", "Career Support"];
 
     const handleSuggestion = (text: string) => {
         setMessage("");
@@ -240,14 +229,14 @@ export default function Edubot() {
 
                         {/* Typing indicator */}
                         {isTyping && (
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <div className="w-6 h-6 rounded-full flex items-center justify-center border border-white/10 shrink-0 bg-white/5 relative mt-0.5">
                                     <GraduationCap className="w-3.5 h-3.5 text-accent" />
                                 </div>
-                                <div className="bg-white/[0.07] rounded-2xl rounded-tl-md px-4 py-3 border border-white/5 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:0ms]" />
-                                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:150ms]" />
-                                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:300ms]" />
+                                <div className="bg-white/10 backdrop-blur-md rounded-2xl rounded-tl-md px-4 py-3 border border-white/10 flex items-center gap-1.5 shadow-xl">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:0s]" />
                                 </div>
                             </div>
                         )}

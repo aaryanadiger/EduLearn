@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { getUserPurchases, getUserProgress } from "@/lib/db";
 import { courses as staticCoursesData } from "@/data/courses";
+import VideoPlayerModal from "@/components/VideoPlayerModal";
 
 export default function StudentDashboard() {
     const { user, profile, loading, logout } = useAuth();
@@ -24,6 +25,9 @@ export default function StudentDashboard() {
         assignmentsDone: 0
     });
     const [isDataLoading, setIsDataLoading] = useState(true);
+    
+    // Video Player State
+    const [selectedVideo, setSelectedVideo] = useState<{ id: string; name: string } | null>(null);
 
     useEffect(() => {
         if (!loading && (!user || profile?.role !== 'student')) {
@@ -113,6 +117,16 @@ export default function StudentDashboard() {
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-black pb-32">
+            {/* Video Player Modal */}
+            {selectedVideo && (
+                <VideoPlayerModal 
+                    isOpen={!!selectedVideo} 
+                    onClose={() => setSelectedVideo(null)} 
+                    courseName={selectedVideo.name}
+                    youtubeId={selectedVideo.id}
+                />
+            )}
+
             {/* Premium Header */}
             <section className="relative pt-40 pb-20 px-6 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-accent/10 to-transparent pointer-events-none" />
@@ -196,9 +210,12 @@ export default function StudentDashboard() {
                                                     <span className="text-[10px] uppercase font-black tracking-widest text-accent/80">{course.category}</span>
                                                     <h4 className="font-bold text-xl text-white group-hover:text-accent transition-colors line-clamp-2 leading-tight pr-4">{course.name}</h4>
                                                 </div>
-                                                <div className="p-3 rounded-2xl bg-black border border-neutral-800 group-hover:border-accent/40 transition-all">
+                                                <button 
+                                                    onClick={() => course.youtubeId && setSelectedVideo({ id: course.youtubeId, name: course.name })}
+                                                    className="p-3 rounded-2xl bg-black border border-neutral-800 group-hover:border-accent/40 transition-all"
+                                                >
                                                     <PlayCircle className="w-5 h-5 text-white/40 group-hover:text-accent" />
-                                                </div>
+                                                </button>
                                             </div>
 
                                             <div className="mt-auto">
@@ -216,7 +233,7 @@ export default function StudentDashboard() {
                                                 </div>
 
                                                 <button 
-                                                    onClick={() => router.push(`/courses/${course.id}`)}
+                                                    onClick={() => course.youtubeId ? setSelectedVideo({ id: course.youtubeId, name: course.name }) : router.push(`/courses/${course.id}`)}
                                                     className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${course.progress === 100
                                                     ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 shadow-lg shadow-emerald-500/10'
                                                     : 'bg-white text-black hover:bg-neutral-200 shadow-xl'
