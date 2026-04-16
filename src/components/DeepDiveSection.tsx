@@ -85,7 +85,7 @@ export default function DeepDiveSection() {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation(); // prevent clicking the card underneath (if card becomes clickable later)
-                                        addToCart(course);
+                                        addToCart(course, []);
                                     }}
                                     className="mt-4 w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-accent hover:text-white transition-colors uppercase tracking-widest text-sm"
                                 >
