@@ -83,4 +83,22 @@ export async function POST(req: Request) {
             </div>
         </div>
         `;
-    }}
+        await transporter.sendMail({
+            from: `"EduLearn" <${userEmail}>`,
+            to: email,
+            subject: `Receipt: Course Enrollment - ${courseName}`,
+            html: htmlTemplate,
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Receipt email sent successfully",
+        });
+    } catch (error) {
+        console.error("Error sending email:", error);
+        return NextResponse.json(
+            { success: false, error: "Failed to send receipt email" },
+            { status: 500 }
+        );
+    }
+}

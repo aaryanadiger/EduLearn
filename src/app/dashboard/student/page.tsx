@@ -64,7 +64,7 @@ export default function StudentDashboard() {
                 // Calculate stats
                 const completedCourses = enrichedCourses.filter(c => c.progress === 100).length;
                 const totalHours = enrichedCourses.reduce((acc, c) => {
-                    const durationVal = parseInt(c.duration) || 0;
+                    const durationVal = parseInt(c.duration || "0") || 0;
                     return acc + (durationVal * (c.progress / 100));
                 }, 0);
 
