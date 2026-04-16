@@ -32,10 +32,15 @@ export default function ModuleSelectionModal({
 
     useEffect(() => {
         if (isOpen) {
-            // When opening, use existing modules if provided, otherwise default to all
-            setSelectedModules(initialSelectedModules.length > 0 ? initialSelectedModules : course.modules);
+            // ONLY initialize when the modal opens to avoid resetting on parent re-renders
+            setSelectedModules(prev => {
+                // If we already have a selection from this "open session", keep it
+                // OR if it's the very first time it's opening for this course
+                if (initialSelectedModules.length > 0) return initialSelectedModules;
+                return course.modules;
+            });
         }
-    }, [isOpen, initialSelectedModules, course.id, course.modules]);
+    }, [isOpen]); // Only react to isOpen changes
 
     if (!isOpen) return null;
 

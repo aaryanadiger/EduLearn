@@ -25,7 +25,7 @@ export default function CourseDetail() {
 
     const { user } = useAuth();
     const { convertPrice, symbol, currency } = useCurrency();
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
     
     const [reviews, setReviews] = useState<Review[]>([]);
     const [newReviewText, setNewReviewText] = useState("");
@@ -55,6 +55,7 @@ export default function CourseDetail() {
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalFlow, setModalFlow] = useState<"cart" | "enroll">("cart");
 
     useEffect(() => {
         if (courseId) {
@@ -131,13 +132,13 @@ export default function CourseDetail() {
     const displayPrice = convertPrice(currentPrice);
 
     const handleEnrollment = async () => {
+        setModalFlow("enroll");
+        setIsModalOpen(true);
+    };
+
+    const processEnrollment = async (modulesToPurchase: string[]) => {
         if (!user) {
             alert("Please login to enroll in this course.");
-            return;
-        }
-
-        if (selectedModules.length === 0) {
-            alert("Please select at least one module to enroll.");
             return;
         }
 
@@ -214,12 +215,17 @@ export default function CourseDetail() {
     };
 
     const handleAddToCart = () => {
+        setModalFlow("cart");
         setIsModalOpen(true);
     };
 
     const handleModalConfirm = (modules: string[]) => {
         setSelectedModules(modules);
-        addToCart(course, modules);
+        if (modalFlow === "cart") {
+            addToCart(course, modules);
+        } else {
+            processEnrollment(modules);
+        }
     };
 
     const handleSubmitReview = async (e: React.FormEvent) => {
@@ -791,6 +797,7 @@ export default function CourseDetail() {
                     onConfirm={handleModalConfirm}
                     course={course}
                     initialSelectedModules={selectedModules}
+                    isUpdate={modalFlow === "cart" && cartItems.some(i => i.id === course.id)}
                 />
             )}
         </main>

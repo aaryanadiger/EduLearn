@@ -50,7 +50,7 @@ export default function RootLayout({
                 className="fixed bottom-1 left-1 z-[9999] text-[10px] text-white/0 hover:text-white/40 transition-colors duration-300 select-none pointer-events-auto font-mono"
                 title="EduLearn Build Version"
               >
-                v2.3.0
+                v2.3.1
               </div>
             </CurrencyProvider>
           </CartProvider>
