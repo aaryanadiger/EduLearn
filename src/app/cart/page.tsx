@@ -2,7 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { Trash2, ShoppingCart, ArrowLeft, Loader2, Coins, Check, Sparkles, GraduationCap, Shield, Info } from "lucide-react";
+import { Trash2, ShoppingCart, ArrowLeft, Loader2, Coins, Check, Sparkles, GraduationCap, Shield, Info, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { recordPurchase } from "@/lib/db";
@@ -11,9 +11,11 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import JSConfetti from 'js-confetti';
 import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/razorpay";
+import { courses as staticCoursesData } from "@/data/courses";
+import ModuleSelectionModal from "@/components/ModuleSelectionModal";
 
 export default function CartPage() {
-    const { cartItems, removeFromCart, cartTotal, clearCart } = useCart();
+    const { cartItems, removeFromCart, updateCartItem, cartTotal, clearCart } = useCart();
     const { convertPrice, symbol, currency } = useCurrency();
     const { user, profile, refreshProfile } = useAuth();
     const router = useRouter();
@@ -23,6 +25,10 @@ export default function CartPage() {
     const [useCoins, setUseCoins] = useState(false);
     const [earnedCoins, setEarnedCoins] = useState(0);
     const [paymentId, setPaymentId] = useState<string | null>(null);
+
+    // Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<any>(null);
 
     const availableCoins = profile?.educoins || 0;
 
@@ -159,6 +165,20 @@ export default function CartPage() {
         }
     };
 
+    const handleEditClick = (item: any) => {
+        const fullCourse = staticCoursesData.find(c => c.id === item.id);
+        if (fullCourse) {
+            setEditingItem({ ...item, modules: fullCourse.modules });
+            setIsEditModalOpen(true);
+        }
+    };
+
+    const handleUpdateConfirm = (selectedModules: string[]) => {
+        if (editingItem) {
+            updateCartItem(editingItem.id, selectedModules);
+        }
+    };
+
     if (success) {
         return (
             <>
@@ -198,6 +218,19 @@ export default function CartPage() {
     return (
         <>
             <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+            
+            {/* Edit Selection Modal */}
+            {editingItem && (
+                <ModuleSelectionModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onConfirm={handleUpdateConfirm}
+                    course={editingItem}
+                    initialSelectedModules={editingItem.selectedModules}
+                    isUpdate={true}
+                />
+            )}
+
             <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-black">
                 <div className="max-w-5xl mx-auto px-6 pt-32 pb-24">
                     {/* Header */}
@@ -215,7 +248,7 @@ export default function CartPage() {
 
                     {/* Content */}
                     {cartItems.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-32 bg-neutral-900/40 rounded-[40px] border border-neutral-800/60 dashed">
+                        <div className="flex flex-col items-center justify-center py-32 bg-neutral-900/40 rounded-[40px] border border-neutral-800/60 border-dashed">
                             <ShoppingCart className="w-16 h-16 text-neutral-800 mb-6" />
                             <h2 className="text-2xl font-bold mb-2">Cart is empty</h2>
                             <p className="text-neutral-500 mb-10 max-w-sm text-center font-light leading-relaxed">Choose modules from your favorite courses to begin your customized learning path.</p>
@@ -224,7 +257,7 @@ export default function CartPage() {
                             </Link>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-[1fr-380px] lg:grid-cols-[1fr_400px] gap-12">
+                        <div className="grid md:grid-cols-[1fr_380px] lg:grid-cols-[1fr_400px] gap-12">
                             {/* Cart Items List */}
                             <div className="flex flex-col gap-8">
                                 {cartItems.map((item) => (
@@ -247,13 +280,22 @@ export default function CartPage() {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <button
-                                                        onClick={() => removeFromCart(item.id)}
-                                                        className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all shrink-0"
-                                                        aria-label="Remove"
-                                                    >
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => handleEditClick(item)}
+                                                            className="p-3 text-neutral-600 hover:text-accent hover:bg-accent/10 rounded-full transition-all shrink-0"
+                                                            title="Edit Selection"
+                                                        >
+                                                            <Edit2 className="w-5 h-5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => removeFromCart(item.id)}
+                                                            className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all shrink-0"
+                                                            aria-label="Remove"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div className="space-y-2 mb-6">
@@ -271,7 +313,9 @@ export default function CartPage() {
 
                                                 <div className="flex items-center justify-between border-t border-neutral-800 pt-6 mt-6">
                                                     <p className="text-neutral-500 text-xs font-medium italic">Proportional Price</p>
-                                                    <p className="text-2xl font-black text-white">{symbol}{(convertPrice(item.price)).toLocaleString()}</p>
+                                                    <p className="text-2xl font-black text-white">
+                                                        {symbol}{convertPrice((item.price / (item.totalModulesCount || 1)) * item.selectedModules.length).toLocaleString()}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

@@ -103,7 +103,9 @@ export default function Cart() {
                                             </div>
                                             
                                             <div className="mt-2 flex items-baseline gap-2">
-                                                <span className="text-accent font-bold text-lg">{symbol}{convertPrice(item.price).toLocaleString()}</span>
+                                                <span className="text-accent font-bold text-lg">
+                                                    {symbol}{convertPrice((item.price / item.totalModulesCount) * item.selectedModules.length).toLocaleString()}
+                                                </span>
                                                 <span className="text-[10px] text-neutral-500 uppercase font-black tracking-widest">
                                                     {item.selectedModules.length} Modules
                                                 </span>

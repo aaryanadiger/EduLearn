@@ -32,9 +32,10 @@ export default function ModuleSelectionModal({
 
     useEffect(() => {
         if (isOpen) {
+            // When opening, use existing modules if provided, otherwise default to all
             setSelectedModules(initialSelectedModules.length > 0 ? initialSelectedModules : course.modules);
         }
-    }, [isOpen, initialSelectedModules, course.modules]);
+    }, [isOpen, initialSelectedModules, course.id, course.modules]);
 
     if (!isOpen) return null;
 
