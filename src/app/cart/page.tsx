@@ -2,7 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { Trash2, ShoppingCart, ArrowLeft, Loader2, Coins, Check, Sparkles, GraduationCap, Shield } from "lucide-react";
+import { Trash2, ShoppingCart, ArrowLeft, Loader2, Coins, Check, Sparkles, GraduationCap, Shield, Info } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { recordPurchase } from "@/lib/db";
@@ -63,7 +63,6 @@ export default function CartPage() {
             setEarnedCoins(rewardCoins);
 
             // Convert final total to INR paise for Razorpay
-            // finalTotal is already in the user's selected currency, convert to INR
             const totalInINR = currency === "INR" ? finalTotal : cartTotal * 83; // fallback USD->INR
             const amountInPaise = Math.round(totalInINR * 100);
 
@@ -74,7 +73,7 @@ export default function CartPage() {
                     return recordPurchase(
                         user.uid,
                         item.id,
-                        item.price,
+                        item.price, // Proportional price
                         currency,
                         isFirstItem ? rewardCoins : 0,
                         isFirstItem ? discountAmount : 0
@@ -88,12 +87,17 @@ export default function CartPage() {
             }
 
             // Step 1: Create Razorpay order
-            const courseNames = cartItems.map(item => item.name).join(", ");
+            const courseSummary = cartItems.map(item => `${item.name} (${item.selectedModules.length} mods)`).join(", ");
             const order = await createRazorpayOrder(
                 amountInPaise,
                 "INR",
                 `cart_${user.uid}_${Date.now()}`,
-                { userId: user.uid, items: cartItems.length.toString(), courses: courseNames.substring(0, 200) }
+                { 
+                    userId: user.uid, 
+                    items: cartItems.length.toString(), 
+                    courses: courseSummary.substring(0, 200),
+                    moduleDetails: JSON.stringify(cartItems.map(i => ({ id: i.id, modules: i.selectedModules })))
+                }
             );
 
             // Step 2: Open Razorpay checkout
@@ -101,7 +105,7 @@ export default function CartPage() {
                 orderId: order.id,
                 amount: order.amount,
                 currency: order.currency,
-                description: `${cartItems.length} course${cartItems.length > 1 ? 's' : ''} from EduLearn`,
+                description: `${cartItems.length} course${cartItems.length > 1 ? 's' : ''} with custom module selection`,
                 userName: user.displayName || "Student",
                 userEmail: user.email || "",
             });
@@ -114,7 +118,7 @@ export default function CartPage() {
                 return recordPurchase(
                     user.uid,
                     item.id,
-                    item.price,
+                    item.price, // Proportional price
                     currency,
                     isFirstItem ? rewardCoins : 0,
                     isFirstItem ? discountAmount : 0
@@ -122,6 +126,26 @@ export default function CartPage() {
             });
 
             await Promise.all(promises);
+
+            // Send Email Receipt
+            try {
+                const courseSummary = cartItems.map(item => item.name).join(", ");
+                await fetch('/api/send-receipt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        userName: user.displayName || "Student",
+                        courseName: courseSummary,
+                        amount: `${symbol}${finalTotal.toLocaleString()}`,
+                        paymentId: result.razorpay_payment_id || "Coin Purchase",
+                        date: new Date().toLocaleDateString()
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to send email receipt:', err);
+            }
+
             await refreshProfile();
             setSuccess(true);
             clearCart();
@@ -139,41 +163,31 @@ export default function CartPage() {
         return (
             <>
                 <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-                <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-                    <div className="bg-neutral-900/80 backdrop-blur-xl p-12 flex flex-col items-center justify-center text-center border border-accent/20 rounded-[40px] max-w-lg w-full shadow-[0_0_80px_rgba(255,94,0,0.1)]">
-                        {/* Animated success ring */}
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center mb-8 relative">
-                            <div className="absolute inset-0 rounded-full border-2 border-accent/30 animate-ping" style={{ animationDuration: '2s' }} />
-                            <div className="absolute inset-2 rounded-full border border-accent/20 animate-pulse" style={{ animationDuration: '3s' }} />
-                            <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center">
-                                <Check className="w-8 h-8 text-accent" />
-                            </div>
+                <main className="min-h-screen bg-black text-white flex items-center justify-center p-6 text-center">
+                    <div className="bg-neutral-900 border border-neutral-800 p-12 rounded-[40px] max-w-lg w-full shadow-2xl animate-in zoom-in duration-500">
+                        <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-8 border border-green-500/30">
+                            <Check className="w-10 h-10 text-green-500" />
                         </div>
-
-                        <div className="flex items-center gap-2 mb-3">
+                        
+                        <div className="flex items-center justify-center gap-2 mb-2">
                             <Sparkles className="w-4 h-4 text-accent" />
-                            <span className="text-accent font-bold text-xs uppercase tracking-widest">Payment Successful</span>
+                            <span className="text-accent font-bold text-xs uppercase tracking-widest">Enrollment Complete</span>
                             <Sparkles className="w-4 h-4 text-accent" />
                         </div>
 
-                        <h1 className="text-3xl font-black mb-4 tracking-tighter">Courses Unlocked!</h1>
-                        <p className="text-neutral-400 mb-6">Your courses have been successfully added to your account. Start learning right away.</p>
-
-                        {paymentId && (
-                            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl px-5 py-3 mb-6 w-full">
-                                <p className="text-xs text-neutral-500 mb-1">Transaction ID</p>
-                                <p className="text-sm text-neutral-300 font-mono truncate">{paymentId}</p>
-                            </div>
-                        )}
+                        <h1 className="text-4xl font-black mb-4 tracking-tighter">Welcome Aboard!</h1>
+                        <p className="text-neutral-400 mb-8 leading-relaxed">Your custom course selection has been activated. Access your modules anytime via the dashboard.</p>
 
                         <div className="bg-accent/10 border border-accent/20 rounded-2xl p-6 w-full mb-8">
-                            <Coins className="w-8 h-8 text-accent mx-auto mb-2" />
-                            <h3 className="text-xl font-bold text-accent mb-1">+{earnedCoins} EduCoins Earned!</h3>
-                            <p className="text-sm text-accent/70">Added to your Wallet</p>
+                            <h3 className="text-xl font-bold text-accent mb-1">+{earnedCoins} EduCoins Reward</h3>
+                            <p className="text-sm text-accent/70">Credentialed to your learning wallet</p>
                         </div>
 
-                        <Link href={`/dashboard/${profile?.role || 'student'}`} className="w-full block text-center bg-accent hover:bg-accent-light text-white font-bold py-4 px-8 rounded-full transition-all hover:shadow-[0_0_30px_rgba(255,94,0,0.3)]">
-                            Go to Dashboard
+                        <Link 
+                            href={`/dashboard/${profile?.role || 'student'}`} 
+                            className="w-full block bg-accent hover:bg-accent-light text-white font-bold py-5 px-8 rounded-full transition-all shadow-lg hover:shadow-accent/20"
+                        >
+                            Start Learning Now
                         </Link>
                     </div>
                 </main>
@@ -185,50 +199,80 @@ export default function CartPage() {
         <>
             <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
             <main className="min-h-screen bg-black text-white selection:bg-accent selection:text-black">
-                <div className="max-w-4xl mx-auto px-6 pt-32 pb-24">
+                <div className="max-w-5xl mx-auto px-6 pt-32 pb-24">
                     {/* Header */}
-                    <div className="flex items-center gap-4 mb-12">
-                        <Link href="/" className="p-3 bg-neutral-900 hover:bg-neutral-800 rounded-full transition-colors group">
-                            <ArrowLeft className="w-5 h-5 text-neutral-400 group-hover:text-white transition-colors" />
+                    <div className="flex items-center gap-6 mb-16">
+                        <Link href="/courses" className="p-3 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-2xl transition-all">
+                            <ArrowLeft className="w-5 h-5 text-neutral-400" />
                         </Link>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase" style={{ fontFamily: 'var(--font-syncopate)' }}>
-                            Checkout
-                        </h1>
+                        <div>
+                            <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase mb-1" style={{ fontFamily: 'var(--font-syncopate)' }}>
+                                Checkout
+                            </h1>
+                            <p className="text-neutral-500 text-sm italic font-light">Custom course purchasing & enrollment</p>
+                        </div>
                     </div>
 
                     {/* Content */}
                     {cartItems.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-32 bg-neutral-900/50 rounded-3xl border border-neutral-800/50">
-                            <ShoppingCart className="w-16 h-16 text-neutral-700 mb-6" />
-                            <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-                            <p className="text-neutral-500 mb-8 max-w-sm text-center">It looks like you haven&apos;t added any courses to your journey yet.</p>
-                            <Link href="/courses" className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-neutral-200 transition-colors">
-                                Explore Courses
+                        <div className="flex flex-col items-center justify-center py-32 bg-neutral-900/40 rounded-[40px] border border-neutral-800/60 dashed">
+                            <ShoppingCart className="w-16 h-16 text-neutral-800 mb-6" />
+                            <h2 className="text-2xl font-bold mb-2">Cart is empty</h2>
+                            <p className="text-neutral-500 mb-10 max-w-sm text-center font-light leading-relaxed">Choose modules from your favorite courses to begin your customized learning path.</p>
+                            <Link href="/courses" className="bg-accent text-white px-10 py-4 rounded-full font-bold hover:bg-accent-light transition-all shadow-lg">
+                                Browse Courses
                             </Link>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-[1fr_350px] gap-12">
+                        <div className="grid md:grid-cols-[1fr-380px] lg:grid-cols-[1fr_400px] gap-12">
                             {/* Cart Items List */}
-                            <div className="flex flex-col gap-6">
+                            <div className="flex flex-col gap-8">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="flex flex-col sm:flex-row gap-6 items-start sm:items-center bg-neutral-900/80 p-6 rounded-3xl border border-neutral-800 transition-colors hover:border-neutral-700">
-                                        <div
-                                            className="w-full sm:w-32 h-40 sm:h-24 rounded-2xl bg-cover bg-center shrink-0 border border-white/5"
-                                            style={{ backgroundImage: `url(${item.image})` }}
-                                        />
-                                        <div className="flex-1 min-w-0 w-full">
-                                            <div className="flex justify-between items-start gap-4">
-                                                <div>
-                                                    <h3 className="font-bold text-lg md:text-xl text-white mb-1 line-clamp-2">{item.name}</h3>
-                                                    <p className="text-accent font-bold">{symbol}{(convertPrice(item.price)).toLocaleString()}</p>
+                                    <div key={item.id} className="relative group bg-neutral-900/60 p-6 md:p-8 rounded-[40px] border border-neutral-800 transition-all hover:border-neutral-700">
+                                        <div className="flex flex-col sm:flex-row gap-8 items-start">
+                                            <div
+                                                className="w-full sm:w-40 h-40 sm:h-32 rounded-3xl bg-cover bg-center shrink-0 border border-white/5 shadow-2xl"
+                                                style={{ backgroundImage: `url(${item.image})` }}
+                                            />
+                                            <div className="flex-1 min-w-0 w-full pt-2">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <h3 className="font-bold text-xl md:text-2xl text-white mb-2 leading-tight">{item.name}</h3>
+                                                        <div className="flex flex-wrap gap-2 mb-4">
+                                                            <span className="px-2.5 py-1 bg-accent/10 border border-accent/20 rounded-md text-[10px] text-accent font-black uppercase tracking-widest">
+                                                                {item.selectedModules.length} Modules Selected
+                                                            </span>
+                                                            <span className="px-2.5 py-1 bg-neutral-800 text-neutral-400 rounded-md text-[10px] font-black uppercase tracking-widest">
+                                                                {item.category}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => removeFromCart(item.id)}
+                                                        className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all shrink-0"
+                                                        aria-label="Remove"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="p-3 text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors shrink-0"
-                                                    aria-label="Remove item"
-                                                >
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
+                                                
+                                                <div className="space-y-2 mb-6">
+                                                    <p className="text-[11px] text-neutral-500 font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                        <Info className="w-3.5 h-3.5" /> Module Details:
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {item.selectedModules.map((mod, i) => (
+                                                            <span key={i} className="text-xs text-neutral-400 bg-neutral-950 border border-neutral-800 px-3 py-1 rounded-full">
+                                                                {mod}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between border-t border-neutral-800 pt-6 mt-6">
+                                                    <p className="text-neutral-500 text-xs font-medium italic">Proportional Price</p>
+                                                    <p className="text-2xl font-black text-white">{symbol}{(convertPrice(item.price)).toLocaleString()}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -236,63 +280,74 @@ export default function CartPage() {
                             </div>
 
                             {/* Order Summary Sidebar */}
-                            <div className="bg-neutral-900/50 rounded-3xl p-8 border border-neutral-800/50 h-fit sticky top-32">
-                                <h3 className="text-xl font-bold mb-6" style={{ fontFamily: 'var(--font-syncopate)' }}>Summary</h3>
+                            <div className="bg-neutral-900 border border-neutral-800 rounded-[40px] p-10 h-fit sticky top-32 shadow-2xl">
+                                <h3 className="text-xl font-black mb-8 tracking-widest uppercase" style={{ fontFamily: 'var(--font-syncopate)' }}>Summary</h3>
 
-                                <div className="flex justify-between items-center mb-4 text-neutral-400">
-                                    <span>Subtotal ({cartItems.length} items)</span>
-                                    <span>{symbol}{rawTotal.toLocaleString()}</span>
-                                </div>
-
-                                {user && profile && availableCoins > 0 && (
-                                    <div className="mb-6 bg-accent/5 border border-accent/20 p-4 rounded-xl">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <Coins className="w-4 h-4 text-accent" />
-                                                <span className="font-bold text-accent">EduCoins</span>
+                                <div className="space-y-4 mb-8">
+                                    <div className="flex justify-between items-center text-neutral-500 text-sm font-medium">
+                                        <span>Proportional Subtotal</span>
+                                        <span>{symbol}{rawTotal.toLocaleString()}</span>
+                                    </div>
+                                    
+                                    {user && profile && availableCoins > 0 && (
+                                        <div className="py-6 border-y border-neutral-800 my-6">
+                                            <div className="bg-accent/5 border border-accent/20 p-5 rounded-2xl">
+                                                <div className="flex items-center justify-between mb-3 text-accent text-sm font-bold">
+                                                    <div className="flex items-center gap-2">
+                                                        <Coins className="w-4 h-4" />
+                                                        <span>EduCoins Wallet</span>
+                                                    </div>
+                                                    <span>{availableCoins}</span>
+                                                </div>
+                                                <label className="flex items-center gap-3 cursor-pointer group">
+                                                    <div className={`w-5 h-5 rounded border-2 transition-all flex items-center justify-center ${useCoins ? 'bg-accent border-accent' : 'border-neutral-700 group-hover:border-neutral-600'}`}>
+                                                        {useCoins && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+                                                    </div>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={useCoins}
+                                                        onChange={(e) => setUseCoins(e.target.checked)}
+                                                        className="hidden"
+                                                    />
+                                                    <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">Apply Coins Index</span>
+                                                </label>
                                             </div>
-                                            <span className="text-accent text-sm font-medium">{availableCoins} Available</span>
                                         </div>
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={useCoins}
-                                                onChange={(e) => setUseCoins(e.target.checked)}
-                                                className="w-4 h-4 rounded border-neutral-700 bg-neutral-800 text-accent focus:ring-accent focus:ring-offset-neutral-900"
-                                            />
-                                            <span className="text-sm text-neutral-300">Apply maximum discount (-{symbol}{discountAmount.toLocaleString()})</span>
-                                        </label>
-                                    </div>
-                                )}
+                                    )}
 
-                                {useCoins && discountAmount > 0 && (
-                                    <div className="flex justify-between items-center mb-4 text-accent">
-                                        <span>Coin Discount</span>
-                                        <span>-{symbol}{discountAmount.toLocaleString()}</span>
-                                    </div>
-                                )}
-
-                                <div className="flex justify-between items-center py-6 border-t border-neutral-800 mb-2">
-                                    <span className="font-bold text-lg">Total</span>
-                                    <span className="text-3xl font-black text-white tracking-tighter">{symbol}{finalTotal.toLocaleString()}</span>
+                                    {useCoins && discountAmount > 0 && (
+                                        <div className="flex justify-between items-center text-accent text-sm font-bold">
+                                            <span>Coin Discount</span>
+                                            <span>-{symbol}{discountAmount.toLocaleString()}</span>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="flex justify-between items-center mb-6 text-sm text-accent">
-                                    <span>Est. EduCoin Reward</span>
-                                    <span className="font-bold">+{calculateReward()} Coins</span>
+                                <div className="flex justify-between items-end mb-10 pt-2">
+                                    <span className="text-xs text-neutral-500 font-black uppercase tracking-widest mb-1.5 block">Final Amount</span>
+                                    <div className="text-right">
+                                        <span className="text-4xl font-black text-white tracking-tighter leading-none">{symbol}{finalTotal.toLocaleString()}</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-2xl mb-8">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-neutral-500 font-bold uppercase tracking-widest">Est. Rewards</span>
+                                        <span className="text-accent font-black">+{calculateReward()} Coins</span>
+                                    </div>
                                 </div>
 
                                 <button
                                     onClick={handleCheckout}
                                     disabled={isCheckingOut}
-                                    className="w-full flex justify-center items-center gap-2 bg-accent hover:bg-accent-light hover:scale-[1.02] text-white font-bold py-4 rounded-full transition-all uppercase tracking-widest text-sm shadow-[0_0_30px_rgba(255,94,0,0.2)] disabled:opacity-50 disabled:hover:scale-100"
+                                    className="w-full bg-accent hover:bg-accent-light text-white font-black py-5 rounded-full transition-all uppercase tracking-[0.2em] text-xs shadow-xl hover:shadow-accent/30 disabled:opacity-50 flex items-center justify-center gap-3 group"
                                 >
-                                    {isCheckingOut ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</> : "Proceed to Payment"}
+                                    {isCheckingOut ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing Order</> : <><ShoppingCart className="w-4 h-4 transition-transform group-hover:-translate-y-1" /> Secure Checkout</>}
                                 </button>
 
-                                <div className="flex items-center justify-center gap-1.5 mt-4">
-                                    <Shield className="w-3.5 h-3.5 text-neutral-600" />
-                                    <p className="text-xs text-neutral-600 font-light">Secure payment via Razorpay</p>
+                                <div className="flex items-center justify-center gap-2 mt-6">
+                                    <Shield className="w-3.5 h-3.5 text-neutral-700" />
+                                    <p className="text-[10px] text-neutral-700 font-black uppercase tracking-tighter">Verified Secure Gateway</p>
                                 </div>
                             </div>
                         </div>

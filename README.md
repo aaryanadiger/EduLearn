@@ -19,15 +19,16 @@ EduLearn is a modern, full-stack education platform built with Next.js 16, React
 ## Features
 
 - **Course Catalog** — Browse and enroll in courses across multiple disciplines
-- **EduBot** — AI-powered learning assistant for instant help
+- **Razorpay Integration** — Secure payments for custom course and module enrollment
+- **Email Confirmations** — Automated enrollment receipts and confirmations via Nodemailer
+- **Dynamic Student Dashboard** — Real-time progress tracking, enrolled courses, and learning analytics
+- **EduBot** — AI-powered learning assistant with custom branding
 - **Live Classes** — Real-time virtual classroom sessions
 - **Dashboards** — Separate panels for Students, Faculty, and Admins
-- **Authentication** — Multi-provider auth (Google, GitHub, Apple) via Firebase
-- **Cart System** — Course cart with checkout flow
-- **Mental Health Resources** — Dedicated wellness section for students
-- **Career Guidance** — Professional development and career planning tools
-- **Region Selector** — Localized content delivery
-- **Premium UI** — Apple-inspired dark mode design with smooth animations
+- **Authentication** — Multi-provider auth via Firebase
+- **Cart System** — Flexible cart with module-level selection
+- **Mental Health & Career Tools** — Integrated student wellness and professional growth resources
+- **Premium UI** — Apple-inspired dark mode design with GSAP & Framer Motion animations
 
 ---
 
@@ -125,7 +126,11 @@ EduLearn/
 
 ## Environment Variables
 
-This project requires Firebase configuration. Refer to [`.env.example`](.env.example) for the full list of required variables.
+This project requires Firebase, Razorpay, and Email configuration. Refer to [`.env.example`](.env.example) for the full list of required variables, which now includes:
+
+- **Firebase Config:** For authentication and database.
+- **Razorpay Config:** `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` for payment processing.
+- **Email Config:** `EMAIL_USER`, `EMAIL_APP_PASSWORD` and `NEXT_PUBLIC_BASE_URL` for sending enrollment receipts.
 
 > **Important:** Never commit `.env.local` or any file containing real API keys. The `.gitignore` is configured to prevent this.
 

@@ -1,32 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { courses } from "@/data/courses";
-import { getCourseReviews, addReview, updateReview, deleteReview, Review, recordPurchase } from "@/lib/db";
+import { getCourseReviews, addReview, updateReview, deleteReview, Review, recordPurchase, getUserPurchases, getCourseProgress, updateCourseProgress } from "@/lib/db";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useCart } from "@/context/CartContext";
 import { TopNav, BottomNav } from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, Trash2, X, Check, Loader2, Sparkles, GraduationCap, Shield } from "lucide-react";
+import { Clock, BookOpen, Users, Globe, CheckCircle2, PlayCircle, Star, Edit2, Trash2, X, Check, Loader2, Sparkles, GraduationCap, Shield, ShoppingCart, Info, Award, Circle } from "lucide-react";
 import Script from "next/script";
 import JSConfetti from 'js-confetti';
 import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/razorpay";
 
 export default function CourseDetail() {
     const params = useParams();
+    const router = useRouter();
     const courseId = params.id as string;
     const course = courses.find(c => c.id === courseId);
-    
+
     const { user } = useAuth();
     const { convertPrice, symbol, currency } = useCurrency();
+    const { addToCart } = useCart();
+    
     const [reviews, setReviews] = useState<Review[]>([]);
     const [newReviewText, setNewReviewText] = useState("");
     const [newReviewRating, setNewReviewRating] = useState(5);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [hoveredRating, setHoveredRating] = useState(0);
+
+    // Module Selection/Progress State
+    const [selectedModules, setSelectedModules] = useState<string[]>(course?.modules || []);
+    const [completedModules, setCompletedModules] = useState<string[]>([]);
+    const [isCheckingEnrollment, setIsCheckingEnrollment] = useState(true);
 
     // Edit State
     const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
@@ -49,19 +58,95 @@ export default function CourseDetail() {
         }
     }, [courseId]);
 
+    useEffect(() => {
+        const checkStatus = async () => {
+            if (user && courseId) {
+                const purchases = await getUserPurchases(user.uid);
+                const enrolled = purchases.some((p: any) => p.courseId === courseId);
+                setIsEnrolled(enrolled);
+
+                if (enrolled) {
+                    const progress = await getCourseProgress(user.uid, courseId);
+                    setCompletedModules(progress);
+                }
+            }
+            setIsCheckingEnrollment(false);
+        };
+
+        if (user) {
+            checkStatus();
+        } else {
+            setIsCheckingEnrollment(false);
+        }
+    }, [user, courseId]);
+
+    useEffect(() => {
+        if (course && !isEnrolled) {
+            setSelectedModules(course.modules);
+        }
+    }, [course, isEnrolled]);
+
+    const toggleModuleSelection = (mod: string) => {
+        if (isEnrolled) return; // Cannot change selection after enrollment
+        setSelectedModules(prev => 
+            prev.includes(mod) 
+                ? prev.filter(m => m !== mod) 
+                : [...prev, mod]
+        );
+    };
+
+    const toggleModuleCompletion = async (mod: string) => {
+        if (!user || !isEnrolled) return;
+
+        const isNowCompleted = !completedModules.includes(mod);
+        
+        // Optimistic UI update
+        setCompletedModules(prev => 
+            isNowCompleted ? [...prev, mod] : prev.filter(m => m !== mod)
+        );
+
+        const success = await updateCourseProgress(user.uid, courseId!, mod, isNowCompleted);
+        if (!success) {
+            // Revert on failure
+            setCompletedModules(prev => 
+                isNowCompleted ? prev.filter(m => m !== mod) : [...prev, mod]
+            );
+            alert("Failed to update progress. Please check your connection.");
+        } else if (isNowCompleted && completedModules.length + 1 === course?.modules.length) {
+            // Course just completed!
+            const jsConfetti = new JSConfetti();
+            jsConfetti.addConfetti({
+                emojis: ['🎓', '🏆', '🔥', '✨'],
+                confettiNumber: 150,
+            });
+        }
+    };
+
+    const perModulePrice = course ? course.price / course.modules.length : 0;
+    const currentPrice = perModulePrice * selectedModules.length;
+    const displayPrice = convertPrice(currentPrice);
+
     const handleEnrollment = async () => {
         if (!user) {
             alert("Please login to enroll in this course.");
             return;
         }
 
-        if (isEnrolled) return; // Already enrolled
+        if (selectedModules.length === 0) {
+            alert("Please select at least one module to enroll.");
+            return;
+        }
+
+        if (isEnrolled) {
+            router.push('/dashboard/student');
+            return;
+        }
 
         setIsProcessingPayment(true);
 
         try {
             // Convert price to INR paise (Razorpay requires smallest currency unit)
-            const priceInINR = course!.price * 83; // USD to INR
+            const priceInINR = currentPrice * 83; // USD to INR
             const amountInPaise = Math.round(priceInINR * 100);
 
             // Step 1: Create order on server
@@ -69,7 +154,7 @@ export default function CourseDetail() {
                 amountInPaise,
                 "INR",
                 `course_${courseId}_${Date.now()}`,
-                { courseId, courseName: course!.name, userId: user.uid }
+                { courseId, courseName: course!.name, userId: user.uid, modules: selectedModules.join(",") }
             );
 
             // Step 2: Open Razorpay checkout
@@ -78,7 +163,7 @@ export default function CourseDetail() {
                 amount: order.amount,
                 currency: order.currency,
                 courseName: course!.name,
-                description: `Enrollment for ${course!.name}`,
+                description: `Enrollment for ${selectedModules.length} module(s) of ${course!.name}`,
                 userName: user.displayName || "Student",
                 userEmail: user.email || "",
             });
@@ -90,9 +175,25 @@ export default function CourseDetail() {
 
             // Record purchase in Firestore
             const coinsEarned = Math.floor(priceInINR * 0.10);
-            await recordPurchase(user.uid, courseId, course!.price, "INR", coinsEarned, 0);
+            await recordPurchase(user.uid, courseId, currentPrice, "INR", coinsEarned, 0);
 
-            // Celebration confetti!
+            try {
+                await fetch('/api/send-receipt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email,
+                        userName: user.displayName || "Student",
+                        courseName: course!.name,
+                        amount: `${symbol}${displayPrice.toLocaleString()}`,
+                        paymentId: result.razorpay_payment_id,
+                        date: new Date().toLocaleDateString()
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to send email receipt:', err);
+            }
+
             const jsConfetti = new JSConfetti();
             jsConfetti.addConfetti({
                 emojis: ['🎓', '🎉', '🌟', '✨', '💻'],
@@ -106,6 +207,14 @@ export default function CourseDetail() {
         } finally {
             setIsProcessingPayment(false);
         }
+    };
+
+    const handleAddToCart = () => {
+        if (selectedModules.length === 0) {
+            alert("Please select at least one module.");
+            return;
+        }
+        addToCart(course, selectedModules);
     };
 
     const handleSubmitReview = async (e: React.FormEvent) => {
@@ -190,7 +299,7 @@ export default function CourseDetail() {
         );
     }
 
-    const displayPrice = convertPrice(course.price);
+    const progressPercentage = Math.round((completedModules.length / (course?.modules.length || 1)) * 100);
 
     return (
         <main className="min-h-screen bg-primary text-secondary selection:bg-accent selection:text-white">
@@ -238,7 +347,7 @@ export default function CourseDetail() {
                             </div>
                         </div>
 
-                        {/* Enrollment Card */}
+                        {/* Enrollment/Progress Card */}
                         <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
                             <div
                                 className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition-opacity"
@@ -247,39 +356,75 @@ export default function CourseDetail() {
                             <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/80 to-transparent" />
 
                             <div className="relative z-10 flex flex-col h-full justify-end pt-40">
-                                <div className="flex items-center justify-between mb-8">
-                                    <span className="text-5xl font-bold text-white">{symbol}{displayPrice.toLocaleString()}</span>
-                                    <div className="flex items-center gap-1 text-accent">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className={`w-5 h-5 ${i < Math.round(dynamicRating) ? 'fill-current' : 'text-neutral-600'}`} />
-                                        ))}
-                                        <span className="text-white ml-2 text-sm">{dynamicRating.toFixed(1)} ({formattedReviewsCount} reviews)</span>
+                                {isEnrolled ? (
+                                    <div className="mb-10">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-xs font-black uppercase tracking-widest text-accent">Your Learning Journey</span>
+                                            <span className="text-2xl font-black text-white italic">{progressPercentage}%</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
+                                            <div 
+                                                className="h-full bg-accent rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(255,94,0,0.3)]"
+                                                style={{ width: `${progressPercentage}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-neutral-500 mt-4 text-center uppercase tracking-[0.2em] font-bold">
+                                            {completedModules.length} of {course.modules.length} modules completed
+                                        </p>
                                     </div>
+                                ) : (
+                                    <div className="flex flex-col mb-8">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-5xl font-bold text-white">{symbol}{displayPrice.toLocaleString()}</span>
+                                            <div className="flex items-center gap-1 text-accent">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} className={`w-5 h-5 ${i < Math.round(dynamicRating) ? 'fill-current' : 'text-neutral-600'}`} />
+                                                ))}
+                                                <span className="text-white ml-2 text-sm">{dynamicRating.toFixed(1)} ({formattedReviewsCount})</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-neutral-500 font-medium uppercase tracking-widest flex items-center gap-2">
+                                            <Info className="w-3.5 h-3.5" /> {selectedModules.length} Modules Selected
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={handleEnrollment}
+                                        disabled={isProcessingPayment || (isEnrolled && progressPercentage === 100)}
+                                        className={`w-full py-5 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2 group/btn ${isEnrolled
+                                                ? 'bg-white text-black hover:bg-neutral-200'
+                                                : 'bg-accent text-white hover:bg-accent-light hover:shadow-[0_0_40px_rgba(255,94,0,0.3)]'
+                                            } disabled:opacity-70 disabled:cursor-not-allowed`}
+                                    >
+                                        {isProcessingPayment ? (
+                                            <><Loader2 className="w-5 h-5 animate-spin" /> Creating Order...</>
+                                        ) : isEnrolled ? (
+                                            progressPercentage === 100 ? <><Award className="w-5 h-5" /> Course Completed</> : <><PlayCircle className="w-5 h-5" /> Continue Learning</>
+                                        ) : (
+                                            <><PlayCircle className="w-5 h-5 transition-transform group-hover/btn:scale-110" /> Enroll Now</>
+                                        )}
+                                    </button>
+
+                                    {!isEnrolled && (
+                                        <button
+                                            onClick={handleAddToCart}
+                                            className="w-full py-4 rounded-full font-bold text-sm border border-neutral-700 hover:border-white text-neutral-400 hover:text-white transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                                        >
+                                            <ShoppingCart className="w-4 h-4" /> Add to Cart
+                                        </button>
+                                    )}
                                 </div>
 
-                                <button
-                                    onClick={handleEnrollment}
-                                    disabled={isProcessingPayment}
-                                    className={`w-full py-5 rounded-full font-bold text-lg transition-all mb-4 flex items-center justify-center gap-2 group/btn ${
-                                        isEnrolled
-                                            ? 'bg-green-500 text-white hover:bg-green-600'
-                                            : 'bg-accent text-white hover:bg-accent-light hover:shadow-[0_0_40px_rgba(255,94,0,0.3)]'
-                                    } disabled:opacity-70 disabled:cursor-not-allowed`}
-                                >
-                                    {isProcessingPayment ? (
-                                        <><Loader2 className="w-5 h-5 animate-spin" /> Creating Order...</>
-                                    ) : isEnrolled ? (
-                                        <><CheckCircle2 className="w-5 h-5" /> Enrolled Successfully</>
-                                    ) : (
-                                        <><PlayCircle className="w-5 h-5 transition-transform group-hover/btn:scale-110" /> Enroll Now</>
-                                    )}
-                                </button>
-                                <div className="flex items-center justify-center gap-4 mt-2">
-                                    <p className="text-center text-xs text-neutral-500 font-light flex items-center gap-1.5">
-                                        <Shield className="w-3.5 h-3.5" /> Secure payment via Razorpay
+                                <div className="flex items-center justify-center gap-4 mt-6">
+                                    <p className="text-center text-[10px] text-neutral-500 font-light flex items-center gap-1.5 uppercase tracking-tighter">
+                                        <Shield className="w-3 h-3" /> Secure Enrollment
                                     </p>
                                     <span className="text-neutral-700 text-xs">•</span>
-                                    <p className="text-center text-xs text-neutral-500 font-light">30-day money-back guarantee</p>
+                                    <p className="text-center text-[10px] text-neutral-500 font-light uppercase tracking-tighter flex items-center gap-1.5">
+                                        Lifetime Access
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -300,19 +445,61 @@ export default function CourseDetail() {
                                 ))}
                             </div>
 
-                            <h2 className="text-3xl font-bold text-white mb-8">Course Curriculum</h2>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-3xl font-bold text-white">Course Curriculum</h2>
+                                <p className="text-sm text-neutral-500 italic">
+                                    {isEnrolled ? "Mark modules as complete to track your progress" : "Select modules to customize your learning journey"}
+                                </p>
+                            </div>
+
                             <div className="space-y-4">
-                                {course.modules.map((mod, i) => (
-                                    <div key={i} className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex items-center justify-between hover:bg-neutral-800 transition-colors cursor-pointer">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-neutral-500 font-bold text-sm">
-                                                {i + 1}
+                                {course.modules.map((mod, i) => {
+                                    const isCompleted = completedModules.includes(mod);
+                                    const isSelected = selectedModules.includes(mod);
+                                    
+                                    return (
+                                        <div 
+                                            key={i} 
+                                            onClick={() => isEnrolled ? toggleModuleCompletion(mod) : toggleModuleSelection(mod)}
+                                            className={`group p-6 rounded-2xl flex items-center justify-between transition-all cursor-pointer border ${
+                                                isEnrolled 
+                                                    ? (isCompleted ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-neutral-900 border-neutral-800 hover:border-accent/30')
+                                                    : (isSelected ? 'bg-accent/5 border-accent/20' : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700')
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+                                                    isEnrolled
+                                                        ? (isCompleted ? 'bg-emerald-500 text-white' : 'bg-black text-neutral-500 group-hover:bg-accent/10')
+                                                        : (isSelected ? 'bg-accent text-white' : 'bg-black text-neutral-500')
+                                                }`}>
+                                                    {isCompleted ? <Check className="w-5 h-5" /> : i + 1}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className={`font-medium transition-colors ${
+                                                        isEnrolled
+                                                            ? (isCompleted ? 'text-neutral-400 line-through' : 'text-white')
+                                                            : (isSelected ? 'text-white' : 'text-neutral-400')
+                                                    }`}>
+                                                        {mod}
+                                                    </span>
+                                                    {isEnrolled && (
+                                                        <span className="text-[10px] uppercase tracking-widest text-neutral-600 font-bold mt-1">
+                                                            {isCompleted ? "Completed" : "Tap to complete"}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <span className="text-white font-medium">{mod}</span>
+                                            <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
+                                                isEnrolled
+                                                    ? (isCompleted ? 'bg-emerald-500 border-emerald-500' : 'border-neutral-700 group-hover:border-accent')
+                                                    : (isSelected ? 'bg-accent border-accent' : 'border-neutral-700')
+                                            }`}>
+                                                {(isCompleted || isSelected) && <Check className={`w-4 h-4 text-white`} />}
+                                            </div>
                                         </div>
-                                        <PlayCircle className="w-5 h-5 text-neutral-500" />
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -329,7 +516,7 @@ export default function CourseDetail() {
                                 </div>
                             </div>
 
-                            <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-3xl">
+                            <div className="bg-neutral-900 border border-neutral-800 p-8 rounded-3xl mb-8">
                                 <h3 className="font-bold text-white mb-6">This course includes:</h3>
                                 <ul className="space-y-4 text-sm text-neutral-400 font-light">
                                     <li className="flex items-center gap-3"><PlayCircle className="w-4 h-4 text-accent" /> 40 hours of on-demand video</li>
@@ -338,6 +525,24 @@ export default function CourseDetail() {
                                     <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-accent" /> Certificate of completion</li>
                                 </ul>
                             </div>
+
+                            {isEnrolled && (
+                                <div className="bg-accent/5 border border-accent/20 p-8 rounded-3xl">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <Award className="w-6 h-6 text-accent" />
+                                        <h3 className="font-bold text-white">Your Achievement</h3>
+                                    </div>
+                                    <p className="text-sm text-neutral-400 font-light leading-relaxed mb-6">
+                                        Complete all modules to earn your verified certification. This can be shared on LinkedIn and your resume.
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-1 flex-1 bg-neutral-800 rounded-full overflow-hidden">
+                                            <div className="h-full bg-accent" style={{ width: `${progressPercentage}%` }} />
+                                        </div>
+                                        <span className="text-[10px] font-black text-accent uppercase tracking-widest">{progressPercentage}%</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -345,7 +550,7 @@ export default function CourseDetail() {
                 {/* Reviews Section */}
                 <div className="px-6 max-w-7xl mx-auto pb-32">
                     <h2 className="text-3xl font-bold text-white mb-8">Student Reviews</h2>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
                         <div className="lg:col-span-2 space-y-8">
                             {/* Write a Review */}
@@ -456,17 +661,17 @@ export default function CourseDetail() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        
+
                                                         {user && user.uid === review.userId && (
                                                             <div className="flex items-center gap-2">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleEditStart(review)}
                                                                     className="p-2 text-neutral-400 hover:text-accent bg-neutral-900 hover:bg-neutral-800 rounded-full transition-colors"
                                                                     title="Edit Review"
                                                                 >
                                                                     <Edit2 className="w-4 h-4" />
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleDeleteReview(review.id!)}
                                                                     className="p-2 text-neutral-400 hover:text-red-500 bg-neutral-900 hover:bg-neutral-800 rounded-full transition-colors"
                                                                     title="Delete Review"
@@ -543,7 +748,7 @@ export default function CourseDetail() {
                         </div>
 
                         <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">You&apos;re Enrolled!</h2>
-                        
+
                         <p className="text-neutral-400 mb-6 leading-relaxed max-w-sm">
                             Congratulations! You&apos;re now enrolled in <strong className="text-white">{course.name}</strong>. Your learning journey starts now.
                         </p>

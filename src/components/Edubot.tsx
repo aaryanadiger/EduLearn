@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { X, Send, Loader2 } from "lucide-react";
+import { X, Send, Loader2, GraduationCap } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────
 interface ChatMessage {
@@ -192,13 +191,8 @@ export default function Edubot() {
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/50">
                         <div className="flex items-center gap-3">
-                            <div className="relative w-9 h-9 rounded-full overflow-hidden border border-white/10 bg-white/5 shrink-0">
-                                <Image
-                                    src="/edubot-logo.png"
-                                    alt="EduBot"
-                                    fill
-                                    className="object-cover"
-                                />
+                            <div className="relative w-9 h-9 rounded-full flex items-center justify-center border border-white/10 bg-white/5 shrink-0">
+                                <GraduationCap className="w-5 h-5 text-accent" />
                             </div>
                             <div>
                                 <h3 className="text-white font-semibold text-sm tracking-tight">
@@ -229,13 +223,8 @@ export default function Edubot() {
                                 className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
                             >
                                 {msg.role === "bot" && (
-                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0 bg-white/5 relative mt-0.5">
-                                        <Image
-                                            src="/edubot-logo.png"
-                                            alt="EduBot"
-                                            fill
-                                            className="object-cover"
-                                        />
+                                    <div className="w-6 h-6 rounded-full flex items-center justify-center border border-white/10 shrink-0 bg-white/5 relative mt-0.5">
+                                        <GraduationCap className="w-3.5 h-3.5 text-accent" />
                                     </div>
                                 )}
                                 <div
@@ -252,13 +241,8 @@ export default function Edubot() {
                         {/* Typing indicator */}
                         {isTyping && (
                             <div className="flex gap-2">
-                                <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10 shrink-0 bg-white/5 relative mt-0.5">
-                                    <Image
-                                        src="/edubot-logo.png"
-                                        alt="EduBot"
-                                        fill
-                                        className="object-cover"
-                                    />
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center border border-white/10 shrink-0 bg-white/5 relative mt-0.5">
+                                    <GraduationCap className="w-3.5 h-3.5 text-accent" />
                                 </div>
                                 <div className="bg-white/[0.07] rounded-2xl rounded-tl-md px-4 py-3 border border-white/5 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:0ms]" />
@@ -319,13 +303,8 @@ export default function Edubot() {
                 className="relative w-14 h-14 md:w-16 md:h-16 rounded-full border border-white/10 shadow-xl shadow-accent/20 hover:scale-105 hover:border-white/20 transition-all duration-300 group flex items-center justify-center bg-black/80 backdrop-blur-md"
             >
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
-                <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden transition-transform duration-300 group-hover:scale-110 border border-white/5">
-                    <Image
-                        src="/edubot-logo.png"
-                        alt="Chat with EduBot"
-                        fill
-                        className="object-cover"
-                    />
+                <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110 border border-white/5 bg-accent">
+                    <GraduationCap className="w-6 h-6 text-white" />
                 </div>
                 {/* Notification dot */}
                 {!isOpen && (

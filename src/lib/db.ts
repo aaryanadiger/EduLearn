@@ -278,3 +278,70 @@ export const getTopReviews = async (limitCount = 5) => {
         return [];
     }
 };
+// Progress Functions
+export const updateCourseProgress = async (userId: string, courseId: string, moduleId: string, completed: boolean) => {
+    try {
+        const progressRef = doc(db, "progress", `${userId}_${courseId}`);
+        const docSnap = await getDoc(progressRef);
+
+        if (!docSnap.exists()) {
+            if (completed) {
+                await setDoc(progressRef, {
+                    userId,
+                    courseId,
+                    completedModules: [moduleId],
+                    updatedAt: serverTimestamp()
+                });
+            }
+        } else {
+            const data = docSnap.data();
+            let modules = data.completedModules || [];
+            if (completed) {
+                if (!modules.includes(moduleId)) {
+                    modules.push(moduleId);
+                }
+            } else {
+                modules = modules.filter((id: string) => id !== moduleId);
+            }
+            await updateDoc(progressRef, {
+                completedModules: modules,
+                updatedAt: serverTimestamp()
+            });
+        }
+        return true;
+    } catch (error) {
+        console.error("Error updating course progress:", error);
+        return false;
+    }
+};
+
+export const getUserProgress = async (userId: string) => {
+    try {
+        const progressRef = collection(db, "progress");
+        const q = query(progressRef, where("userId", "==", userId));
+        const querySnapshot = await getDocs(q);
+
+        const progress: any[] = [];
+        querySnapshot.forEach((doc) => {
+            progress.push({ id: doc.id, ...doc.data() });
+        });
+        return progress;
+    } catch (error) {
+        console.error("Error fetching user progress:", error);
+        return [];
+    }
+};
+
+export const getCourseProgress = async (userId: string, courseId: string) => {
+    try {
+        const progressRef = doc(db, "progress", `${userId}_${courseId}`);
+        const docSnap = await getDoc(progressRef);
+        if (docSnap.exists()) {
+            return docSnap.data().completedModules || [];
+        }
+        return [];
+    } catch (error) {
+        console.error("Error fetching course-specific progress:", error);
+        return [];
+    }
+};

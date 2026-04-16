@@ -6,19 +6,27 @@ import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
 import { courses } from "@/data/courses";
-import { Clock, BookOpen, Users, ArrowRight, Filter, Star } from "lucide-react";
+import { Clock, BookOpen, Users, ArrowRight, Filter, Star, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useCart } from "@/context/CartContext";
 import { RegionSelector } from "@/components/RegionSelector";
+import ModuleSelectionModal from "@/components/ModuleSelectionModal";
 
 export default function CoursesPage() {
     const { currency, setCurrency, convertPrice, symbol } = useCurrency();
+    const { addToCart } = useCart();
+    
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [priceRange, setPriceRange] = useState<number>(100);
     const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
     const [selectedRating, setSelectedRating] = useState<number>(0);
     const [hoveredRating, setHoveredRating] = useState<number>(0);
     const [sortBy, setSortBy] = useState<string>('popular');
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeCourse, setActiveCourse] = useState<any>(null);
 
     let filteredCourses = courses.filter(course => {
         const matchCategory = selectedCategory === 'all' || course.category === selectedCategory;
@@ -36,6 +44,19 @@ export default function CoursesPage() {
         return b.students - a.students; // default: popular
     });
 
+    const handleAddToCartClick = (e: React.MouseEvent, course: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setActiveCourse(course);
+        setIsModalOpen(true);
+    };
+
+    const handleModalConfirm = (selectedModules: string[]) => {
+        if (activeCourse) {
+            addToCart(activeCourse, selectedModules);
+        }
+    };
+
     const categories = [
         { id: 'all', label: 'All Courses' },
         { id: 'programming', label: 'Programming' },
@@ -45,6 +66,7 @@ export default function CoursesPage() {
         { id: 'marketing', label: 'Marketing' },
         { id: 'mobile', label: 'Mobile App' },
     ];
+
     return (
         <main className="min-h-screen bg-primary text-secondary selection:bg-accent selection:text-white">
             <CustomCursor />
@@ -191,7 +213,7 @@ export default function CoursesPage() {
                                         <Link
                                             href={`/courses/${course.id}`}
                                             key={course.id}
-                                            className="group relative bg-neutral-900 border border-neutral-800 rounded-[32px] overflow-hidden flex flex-col hover:border-accent/50 transition-colors"
+                                            className="group relative bg-neutral-900 border border-neutral-800 rounded-[32px] overflow-hidden flex flex-col hover:border-accent/30 transition-all hover:shadow-[0_0_40px_rgba(255,94,0,0.05)]"
                                         >
                                             <div className="aspect-[4/3] relative overflow-hidden">
                                                 <div
@@ -244,13 +266,17 @@ export default function CoursesPage() {
                                                 </div>
 
                                                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-neutral-800">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-xs font-bold text-white">
-                                                            {course.instructor.charAt(0)}
-                                                        </div>
-                                                        <span className="text-sm font-medium text-white">{course.instructor}</span>
+                                                    <button 
+                                                        onClick={(e) => handleAddToCartClick(e, course)}
+                                                        className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-accent hover:text-white text-neutral-400 text-xs font-bold rounded-full transition-all group/btn"
+                                                    >
+                                                        <ShoppingCart className="w-4 h-4 transition-transform group-hover/btn:scale-110" />
+                                                        ADD TO CART
+                                                    </button>
+                                                    
+                                                    <div className="flex items-center gap-2 ml-auto">
+                                                        <ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-accent transition-colors group-hover:translate-x-1" />
                                                     </div>
-                                                    <ArrowRight className="w-5 h-5 text-neutral-500 group-hover:text-accent transition-colors group-hover:translate-x-1" />
                                                 </div>
                                             </div>
                                         </Link>
@@ -263,6 +289,16 @@ export default function CoursesPage() {
 
                 <Footer />
             </SmoothScroll>
+
+            {/* Module Selection Modal */}
+            {activeCourse && (
+                <ModuleSelectionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={handleModalConfirm}
+                    course={activeCourse}
+                />
+            )}
         </main>
     );
 }
